@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 맵핑될 DAO 인터페이스의 Full name 을 줍니다. -->
+<mapper namespace="kr.co.hjitERS.service.dao.SerialDAO">
+
+	<select id="getDataBySerial" resultType="int" parameterType="String">
+		SELECT 
+			COUNT(1) AS cnt
+       	FROM S_SHIPPER_MAIN  	
+		WHERE GUBUN = '01'
+	 	    AND SERIAL = #{strSerial}
+	 	    AND LENGTH(JUN_NO) = '12' 
+	</select>
+	
+	<select id="getNewSerial" resultType="String" parameterType="String">
+		SELECT
+			nvl(max(a.serial), 0) as serial
+		FROM
+			s_shipper_main a
+		WHERE
+			a.gubun = '01'
+			and a.serial like '' || #{strDate} || '%'
+	</select>
+	
+	<select id="getNewSerialSub" resultType="SerialSubVO" parameterType="String">
+		SELECT A.SERIAL, A.TRAN_SEQ, A.SHIP_CONTNO, A.SHIP_POINT, A.SHIP_HOLD 
+		      , A.SHIP_SEQ, A.SHIP_BLNO, A.SHIP_REFNO, A.SHIP_REFNO2, A.SHIP_PERSONAL 
+		      , A.SHIP_HOLDDESC, A.SHIP_VESSEL, A.SHIP_VOYAGE, A.SHIP_OPERATOR, A.SHIP_TYPE 
+		      , A.SHIP_COUNT, A.SHIP_UNIT, A.SHIP_QTY, A.SHIP_RATE, A.SHIP_TOTAL 
+		      , A.SHIP_AMOUNT, A.SHIP_VAT_AMT, A.SHIP_DRIVER_NAME, A.SHIP_DRIVER_HP, A.SHIP_TRUCKNO 
+		      , A.SHIP_BASEDATE, A.SHIP_LIMITDATE, A.SHIP_TAXDATE, A.SHIP_MRN, A.SHIP_INVOICENO 
+		      , A.SHIP_VESSELNAME, A.SHIP_ARRIVE 
+		FROM S_SHIPPER_SUB A
+      	WHERE A.GUBUN = '01' 
+		    AND A.SERIAL = #{serial}  
+		ORDER BY A.TRAN_SEQ ASC 
+	</select>
+	
+	<!-- id 속성은 DAO 의 메소드와 같아야 한다. 여기의 loginVO 는 mybatis-confg.xml 에 Alias 되어 있습니다. -->
+	<insert id="insertShipperMain" parameterType="kr.co.hjitERS.vo.SerialMainVO">
+		<selectKey keyProperty="rtn" resultType="java.lang.Integer"> 
+			select 1 from dual
+		</selectKey> 
+	
+        INSERT INTO S_SHIPPER_MAIN
+        	(GUBUN, SERIAL, SALE_CLASS, ISSUE_DATE, CU_CODE, TAKE_USER
+        	, TAKE_USERMAIL, TAX_SNUM, PROC_TYPE, SHIP_CUSTOMS, SHIP_TOT
+        	, SHIP_AMT, SHIP_VAT, SHIP_DEP, INUSER, INDATE)
+		VALUES 
+		(#{gubun}, #{serial}, #{sale_class}, #{issue_date}, #{cu_code}, #{take_user}
+		, #{take_usermail}, #{tax_snum}, #{proc_type}, #{ship_customs}, #{ship_tot}
+		, #{ship_amt}, #{ship_vat}, #{ship_dep}, #{inuser}, #{indate}
+		) 
+    </insert>
+    
+	<!-- id 속성은 DAO 의 메소드와 같아야 한다. 여기의 loginVO 는 mybatis-confg.xml 에 Alias 되어 있습니다. -->
+	<update id="infupdate" parameterType="kr.co.hjitERS.vo.SerialSubVO">
+		<selectKey keyProperty="rtn" resultType="java.lang.Integer"> 
+			select 1 from dual
+		</selectKey> 
+	
+        UPDATE
+        	BIE_SHIPPER_INF
+        SET      	
+			<if test='option.equals("delete")'>
+        	BIE_SHIP_ERPCONFIRM = '0'  
+			, BIE_SHIP_PAYMENT = 'N'
+			</if>      	
+			<if test='option.equals("save")'>
+        	BIE_SHIP_ERPCONFIRM = '1'
+			</if>
+        WHERE 
+        	BIE_SHIP_CONTNO = #{ship_contno}
+        	AND BIE_SHIP_POINT = #{ship_point}
+        	AND BIE_SHIP_HOLD = #{ship_hold}
+        	AND BIE_SHIP_SEQ = #{ship_seq}
+    </update>
+    
+	<!-- id 속성은 DAO 의 메소드와 같아야 한다. 여기의 loginVO 는 mybatis-confg.xml 에 Alias 되어 있습니다. -->
+	<delete id="delete" parameterType="string">
+		DELETE FROM
+			S_SHIPPER_SUB
+		WHERE
+			GUBUN = '01'
+			AND SERIAL = #{serial}
+    </delete>
+	
+	<!-- id 속성은 DAO 의 메소드와 같아야 한다. 여기의 loginVO 는 mybatis-confg.xml 에 Alias 되어 있습니다. -->
+	<insert id="insertShipperSub" parameterType="kr.co.hjitERS.vo.SerialMainVO">
+		<selectKey keyProperty="rtn" resultType="java.lang.Integer"> 
+			select 1 from dual
+		</selectKey> 
+	
+        INSERT INTO S_SHIPPER_SUB (
+ 	  		GUBUN, SERIAL, TRAN_SEQ, SHIP_CONTNO, SHIP_POINT
+		 	, SHIP_HOLD, SHIP_SEQ, SHIP_BLNO, SHIP_REFNO, SHIP_REFNO2
+		 	, SHIP_PERSONAL, SHIP_HOLDDESC, SHIP_VESSEL, SHIP_VOYAGE, SHIP_OPERATOR
+		 	, SHIP_TYPE, SHIP_COUNT, SHIP_UNIT, SHIP_QTY, SHIP_RATE
+		 	, SHIP_TOTAL, SHIP_AMOUNT, SHIP_VAT_AMT, SHIP_DRIVER_NAME, SHIP_DRIVER_HP
+		 	, SHIP_TRUCKNO, SHIP_BASEDATE, SHIP_LIMITDATE, SHIP_TAXDATE, SHIP_MRN
+		 	, SHIP_INVOICENO, SHIP_VESSELNAME, SHIP_ARRIVE, INUSER, INDATE
+		 )
+		 VALUES (
+		 	  #{gubun}, #{serial}, #{tran_seq}, #{ship_contno}, #{ship_point}	   
+		 	, #{ship_hold}, #{ship_seq}, #{ship_blno}, #{ship_refno}, #{ship_refno2}	   
+		 	, #{ship_personal}, #{ship_holddesc}, #{ship_vessel}, #{ship_voyage}, #{ship_operator}
+ 			, #{ship_type}, #{ship_count}, #{ship_unit}, #{ship_qty}, #{ship_rate}
+ 			, #{ship_total}, #{ship_amount}, #{ship_vat_amt}, #{ship_driver_name}, #{ship_driver_hp}
+ 			, #{ship_truckno}, #{ship_basedate}, #{ship_limitdate}, #{ship_taxdate}, #{ship_mrn}
+ 			, #{ship_invoiceno}, #{ship_vesselname}, #{ship_arrive}, #{inuser}, #{indate}
+		 )
+    </insert>
+    
+	<!-- id 속성은 DAO 의 메소드와 같아야 한다. 여기의 loginVO 는 mybatis-confg.xml 에 Alias 되어 있습니다. -->
+	<update id="updateProgress" parameterType="string">
+		<selectKey keyProperty="rtn" resultType="java.lang.Integer"> 
+			select 1 from dual
+		</selectKey> 
+	
+        UPDATE
+        	HIST_VIRT_ACCT_TRORI
+        SET
+        	PROCESS =  '1'
+        	, SERIAL =  #{serial}
+        	, PROCESS_AMOUNT =  #{vatramt}
+        	, REMARK = 'ERS2'
+        WHERE 
+        	ISTCD =  #{istcd}
+        	AND VIR_ACCTNO =  #{vir_acctno}
+        	AND TRAN_DD =  #{tran_dd}
+        	AND TRAN_HH =  #{tran_hh}
+        	AND VATRSNO =  #{vatrsno}
+    </update>
+</mapper>

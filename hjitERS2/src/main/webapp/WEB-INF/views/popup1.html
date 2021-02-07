@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>정산서비스 크롬버전 베타 오픈 안내</title>
+<LINK href="lib/_Css/common.css" type="text/css" rel="stylesheet">
+<LINK href="lib/_Css/style.default.css" type="text/css" rel="stylesheet">
+<LINK href="lib/_Css/board.css" type="text/css" rel="stylesheet">
+<LINK href="lib/_Css/webfont.css" type="text/css" rel="stylesheet">
+
+<style type="text/css">
+.content-wrap {max-width:580px;margin:0 auto;overflow:hidden;min-width:220px;}
+.content-wrap h1 {font-size:30px;font-weight:bold;color:#222;line-height:100%;margin:20px 0;}
+
+h2 {font-size:18px;color:#000;padding-bottom:10px;}
+h3 {font-size:16px;color:#3168b2;padding:10px 0}
+h4 {font-size:14px;color:#666;padding:5px 0}
+
+</style>
+<script language="JavaScript">
+
+//팝업 쿠키설정
+function setCookie( name, value, expiredays )
+{
+	var todayDate = new Date();
+	todayDate.setDate( todayDate.getDate() + expiredays );
+	document.cookie = name + "=" + escape( value ) + "; path=/; expires=" + todayDate.toGMTString() + ";"
+}
+//미수금 현황 쿠키 적용한뒤 창 닫기 
+function closeWin()
+{
+	setCookie( "popup1", "done" , 1);  // 오른쪽 숫자는 쿠키를 유지할 기간을 설정합니다
+		
+	self.close();
+}
+
+</script>
+</head>
+<body>
+<div class="content-wrap">
+	<div class="gap"></div>
+	<br/>
+	
+	<h2>정산서비스 크롬버전 베타 오픈 안내</h2>
+	<br/>당 터미널을 이용해 주시는 모든 고객분들께 진심으로 감사의 말씀을 드립니다.
+	<br/><br/>현재 서비스 중인 정산서비스 시스템의 불편사항을 개선하고자 
+	<br/>신규 시스템을 개발을 진행 중에 있습니다. (엣지, 웨일 브라우저 포함)
+	<br/>
+	<br/>신규 서비스의 정식 오픈 전, 사용자 불편사항 확인을 위해
+	<br/>2주간 베타 서비스를 진행합니다.
+	<br/>
+	<br/>최신 브라우저(크롬, 엣지, 웨일브라우저 등)를 통해 아래 링크로 접속하여
+	<br/>정산서비스를 이용해 보시고 불편사항 또는 오류를 알려주시면 정식 오픈시 반영하여
+	<br/>추후 원활한 서비스를 제공하도록 하겠습니다.  
+	<br/>
+	<br/>■ 접속 주소 : <a href="http://ers2.hjit.co.kr" target="_blank">http://ers2.hjit.co.kr</a>
+	<br/>■ 베타 오픈 기간 : 2020년 12월 15일 ~ 31일
+	<br/>■ 사용 문의 : 032 - 202 - 4922 또는 it@hjit.co.kr
+	<br/><font color="red" size="1.5" >※ 위 사이트는 정식 오픈 전으로 사용 후 정상처리 확인이 필요할 수 있으며 수시로 접속이 제한될 수 있습니다.</font>
+    
+	<br/><br/><br/>
+	
+	<div class="c mg40t">
+		<table id="Table3" cellspacing="0" cellpadding="0" height="459" width="100%" border="0" style="table-layout:fixed;">
+			<tr>
+				<td valign="top" >
+					<input type="checkbox" class="btn" name="close" value="OK" onclick="javascript:closeWin();"/>하루동안 이 창을 열지 않음	
+				</td>
+			</tr>
+		</table> 
+	</div>	
+</div>
+<div class="gap"></div>
+</body>
+</html>
+
+

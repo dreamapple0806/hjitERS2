@@ -1,0 +1,78 @@
+package kr.co.hjitERS.controller;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
+
+import kr.co.hjitERS.service.dao.LoginDAO;
+import kr.co.hjitERS.vo.CustVO;
+import kr.co.hjitERS.vo.LoginVO;
+
+@Controller
+@Transactional
+public class LoginController {
+
+	private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
+	
+	@Resource(name = "loginService")
+	private LoginDAO loginService;
+
+	@RequestMapping(value = "/") 
+	public String loginUsrView(HttpServletRequest request, HttpServletResponse response, ModelAndView mav) throws Exception {
+		logger.info("loginUsrView");
+		HttpSession session = request.getSession();
+		
+    	if(session.getAttribute("userInfo") != null) {
+    		logger.info("home");
+        	return "home";
+        }
+        else {
+    		logger.info("index");
+        	return "index";
+        }		 
+	}	 
+	
+	@RequestMapping(value = "/login.do") 
+	public void login() throws Exception {
+		logger.info("login");
+
+		 
+	}
+
+	@RequestMapping(value = "/loginProcess.do") 
+	public void loginPost(LoginVO dto, Model model) throws Exception {
+		logger.info("loginPost LoginVO : " + dto.toString());
+		logger.info("loginPost Model : " + model.toString());
+		
+		try {
+			CustVO vo = loginService.loginCustInfo(dto);
+			
+			if(vo != null) {
+				model.addAttribute("userInfo", vo);			
+			}
+			else {
+				model.addAttribute("loginResult", "로그인정보가 잘못 되었습니다.");
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		 
+	}
+	
+	@RequestMapping(value = "/logoutProcess.do")
+	public String logout(HttpServletRequest request, HttpServletResponse response, HttpSession httpSession) throws Exception {
+		httpSession.invalidate();
+		
+		return "/userLogout";
+	}
+}
