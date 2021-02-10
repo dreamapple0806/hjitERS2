@@ -13,6 +13,11 @@
 	<link rel="stylesheet" href="resources/lib/css/custom.css">
 	<link rel="shortcut icon" href="resources/image/favicon.ico" type="image/x-icon">
 </head>
+<!-- Jquery, popper, bootstrap 자바스크립트 추가 -->
+<script src="resources/lib/js/jquery-3.4.1.min.js"></script>
+<script src="resources/lib/js/popper.js"></script>
+<script src="resources/lib/js/bootstrap.min.js"></script>
+<script src="resources/lib/js/util.js"></script>
 <style type="text/css">
 @font-face{
 	font-family: 'nexon2gothic';
@@ -68,9 +73,9 @@
 		<div style="position: absolute; top:51%; left:59.5%">
 			<form name="loginForm" action="loginProcess.do" method="post" style="width:230px;height:150px">
 				<label style="font-style: normal; font-size:15px; font-weight:bolder; color:#0064CD; margin-bottom:3px;">아이디</label>
-				<input type="text" name="userId" class="form-control" style="width:230px; font-size:10px; " placeholder="ID : 계산서발행 사업자번호(공급받는자)">
+				<input type="text" name="userId" value="" class="form-control" style="width:230px; font-size:10px; " placeholder="ID : 계산서발행 사업자번호(공급받는자)">
 				<label style="font-style: normal; font-size:15px; font-weight:bolder; color:#0064CD; margin-bottom:3px;">비밀번호</label>
-				<input type="text" name="userPassword" class="form-control" style="width:230px; font-size:10px" placeholder="PW : 계산서발행 사업자번호(공급받는자)">
+				<input type="text" name="userPassword" value="" class="form-control" style="width:230px; font-size:10px" placeholder="PW : 계산서발행 사업자번호(공급받는자)">
 				<input type="checkbox" name="idsave" value="saveOk">
 				<label style="font-style: normal; font-size:15px; font-weight:bolder; color:#0064CD; margin-bottom:3px;">아이디 저장</label>
 				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button class="btn btn-sm btn-primary" type="submit" style="margin-top:5px;" onClick="login();">로그인</button>				
@@ -102,10 +107,6 @@
 		</div>
 	</div>
 	<!-- <footer class="bg-dark mt-4 p-4 text-center" style="color: #FFFFFF;">Copyright 2020 Hanjin Incheon Container Terminal All Rights Reserved.</footer> -->
-	<!-- Jquery, popper, bootstrap 자바스크립트 추가 -->
-	<script src="resources/lib/js/jquery-3.4.1.min.js"></script>
-	<script src="resources/lib/js/popper.js"></script>
-	<script src="resources/lib/js/bootstrap.min.js"></script>
 	<script>
 		window.onload = function() {
 			if (getCookie("id")) { 
@@ -166,19 +167,22 @@
 	        else { 
 	            setCookie("id", document.loginForm.userId.value, 0); 
 	        }
-	        
+			
 			// 아이디 / 비밀번호 입력여부 체크
 			if (document.loginForm.userId.value =="") {
 		        alert("아이디를 입력하세요");
-		        return false;
+ 				return false;
+				
 		    } 
-			else if (document.loginForm.userPassword.value =="") {
+			if (document.loginForm.userPassword.value =="") {
 		        alert("비밀번호를 입력하세요");
-		        return false;
+ 				return false;				
 		    } 
-			
+			if (document.loginForm.userId.value =="" && document.loginForm.userPassword.value =="") {
+		        alert("비밀번호를 입력하세요");
+ 				return false;				
+		    } 
 			document.loginForm.submit();
-			return false;
 		}
 	</script>
 </body>

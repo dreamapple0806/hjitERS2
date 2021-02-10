@@ -18,8 +18,21 @@
 <!-- 부트스트랩, 커스텀 css 파일 링크 설정 -->
 <link rel="stylesheet" href="resources/lib/css/bootstrap.min.css">
 <link rel="shortcut icon" href="resources/image/favicon.ico" type="image/x-icon">
+<!-- Jquery, popper, bootstrap 자바스크립트 추가 -->
+<script src="resources/lib/js/jquery-3.4.1.min.js"></script>
+<script src="resources/lib/js/popper.js"></script>
+<script src="resources/lib/js/bootstrap.min.js"></script>
+<script src="resources/lib/js/util.js"></script>
+<script src="resources/lib/jsDelivr/sweetalert2.all.min.js"></script>
+
+<style>
+	.swal2-title{
+		font-size: 20px;
+	}
+</style>
+
 </head>
-<body onload="betaAlert();">
+<body>
 	<%
 		request.setCharacterEncoding("utf-8");	
 		Date d = new Date();	       
@@ -416,13 +429,15 @@
 		<address>주소 : 인천광역시 연수구 인천신항대로 777 한진인천컨테이너터미널&nbsp;&nbsp;&nbsp;
 		사업자번호 : 131-86-66125&nbsp;&nbsp;&nbsp;TEL : 032) 202 - 4900&nbsp;&nbsp;&nbsp;FAX : 032) 821 - 9072</address>
 	</footer>
-	<!-- Jquery, popper, bootstrap 자바스크립트 추가 -->
-	<script src="resources/lib/js/jquery-3.4.1.min.js"></script>
-	<script src="resources/lib/js/popper.js"></script>
-	<script src="resources/lib/js/bootstrap.min.js"></script>
-	<script src="resources/lib/js/util.js"></script>
+</body>
 	<script>
-	
+		$().ready(function () { 
+			Swal.fire({ 
+				icon: 'success', // Alert 타입 
+				title: '익스플로러에서는 호환성 보기 메뉴에서\n[hjit.co.kr] 항목을 제거해주기 바랍니다.', // Alert 제목 
+				text: '사용 오류 문의 : 032 - 202 - 4922' // Alert 내용 
+			}); 
+		});
 	
 		function betaAlert(){
 			alert("해당 사이트는 크롬 브라우저를 위한 테스트 사이트 입니다. \n정산처리 후, 오류발생시 연락바랍니다. (TEL. 032-202-4922)");
@@ -464,13 +479,18 @@
  			}
 	 		
  			if(ck.value == 1){
-				alert("환불 및 주의사항에 동의 하셨습니다.");
-				$("#agreeChk").text('취소');
-				var offset = $("#space").offset();
-		        $('html, body').animate({scrollTop : offset.top}, 400);
+ 				//alert("환불 및 주의사항에 동의 하셨습니다.");	
+ 				Swal.fire({ 
+					title: '환불 및 주의사항에 동의 하셨습니다' // Alert 제목                         
+ 		        }).then(function(){
+					$("#agreeChk").text('취소');
+					var offset = $("#space").offset();            
+ 		            $('html, body').animate({scrollTop : offset.top}, 400);
+				});
  			}
  			else{
-				alert("환불 및 주의사항 동의에 취소하셨습니다.");
+				//alert("환불 및 주의사항 동의에 취소하셨습니다.");
+ 				Swal.fire('환불 및 주의사항 동의에 취소하셨습니다.');
 				$("#agreeChk").text('동의');
  			}
 	 	}
@@ -485,17 +505,21 @@
 			
 			if($("input:radio[name=prePaidY]:checked").val() == "Y"){
 				if(today > selectedDate){
-	        		alert("반출일자가 현재일자보다 오래되었습니다. 반출일자를 확인해주세요.");
+	        		//alert("반출일자가 현재일자보다 오래되었습니다. 반출일자를 확인해주세요.");
+	 				Swal.fire('반출일자가 현재일자보다 오래되었습니다. 반출일자를 확인해주세요.');
 	        		return false;
 	        	}
 				
 				if(today == selectedDate){
-	        		alert("반출일자와 현재일자가 동일합니다. 반출일자를 확인해주세요.");
+	        		//alert("반출일자와 현재일자가 동일합니다. 반출일자를 확인해주세요.");
+	 				Swal.fire('반출일자와 현재일자가 동일합니다. 반출일자를 확인해주세요.');
 	        		return false;
 	        	}
 				
 	        	if(bie_ship_contno_shr == "" && bie_ship_blno_shr == "") {
-					alert("컨테이너 번호 또는 계산서 번호를 입력해 주세요");
+					//alert("컨테이너 번호 또는 계산서 번호를 입력해 주세요.");
+	 				Swal.fire('컨테이너 번호 또는 BL 번호를 입력하세요.');
+					
 					f.bie_ship_contno_shr.focus();
 					return false;
 				}
@@ -505,7 +529,8 @@
 			}
 			else{
 	        	if(bie_ship_contno_shr == "" && bie_ship_blno_shr == "") {
-					alert("컨테이너 번호 또는 계산서 번호를 입력해 주세요 : ");
+					//alert("컨테이너 번호 또는 계산서 번호를 입력해 주세요.");
+	 				Swal.fire('[컨테이너 번호] 또는 [BL 번호]를 입력하세요.');
 					f.bie_ship_contno_shr.focus();
 					return false;
 				}
@@ -617,12 +642,18 @@
 		            	
 		            }
 		            else{
-			        	alert('조회 결과가 없습니다.');
+			        	//alert('조회 결과가 없습니다.');
+		 				Swal.fire('조회 결과가 없습니다.');
 		            }
 		        },error:function(request,status,error){
 		        	var console = window.console || {log:function(){}};
 		        	console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
-		        	alert("로그인 세션이 끊어졌습니다.");
+		        	//alert("로그인 세션이 끊어졌습니다.");
+		        	Swal.fire(
+		        			  '로그인 세션이 끊어졌습니다.',
+		        			  '다시 로그인 해주세요.',
+		        			  'question'
+		        	);
 		        	location.href = "/";
 		        }
 		    });
@@ -789,7 +820,8 @@
 					&& (unProcSeq == procSeq) 
 					&& (unProcLimit == procLimit)
 				){				
-					alert("[" + unProcContno + "] " + j + "번째 라인에 이미 적용된 컨테이너 입니다.");
+					//alert("[" + unProcContno + "] " + j + "번째 라인에 이미 적용된 컨테이너 입니다.");
+	 				Swal.fire('[' + unProcContno + '] ' + j + '번째 라인에 이미 적용된 컨테이너 입니다.');
 					return false;
 				}
 			}
@@ -873,7 +905,8 @@
 				$('#ship_tot').val(numberFormat(tot));
 				
         		if(ckCnt == 0){
-        			alert("삭제할 컨테이너를 선택하세요.");
+        			//alert("삭제할 컨테이너를 선택하세요.");
+	 				Swal.fire('삭제할 컨테이너를 선택하세요.');
         		}
             	
         	})
@@ -936,13 +969,19 @@
 		            	$("#virAcctListTable > tbody").html(html);
 		            }
 		            else{
-			        	alert('조회 결과가 없습니다.');
+			        	//alert('조회 결과가 없습니다.');
+		 				Swal.fire('조회 결과가 없습니다.');
 		            }
 		        },
 		        error:function(request,status,error){
 		        	var console = window.console || {log:function(){}};
 		        	console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
-		        	alert("로그인 세션이 끊어졌습니다.");
+		        	//alert("로그인 세션이 끊어졌습니다.");
+		        	Swal.fire(
+		        			  '로그인 세션이 끊어졌습니다.',
+		        			  '다시 로그인 해주세요.',
+		        			  'question'
+		        	);
 		        	location.href = "/";
 		        }
 		    });
@@ -968,24 +1007,29 @@
 				var regex=/^[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/;
 	 			
 				if($('#cu_code').val() == ""){
-	                alert("거래처를 입력해 주세요.");
+	                //alert("거래처를 입력해 주세요.");
+	 				Swal.fire("거래처를 입력해 주세요.");
 	                return false;
 				}
 				if($('#cu_adcode').val() == ""){
-	                alert("사업자번호를 입력해 주세요.");
+	                //alert("사업자번호를 입력해 주세요.");
+	 				Swal.fire("사업자번호를 입력해 주세요.");
 					return false;
 				}
 				if($('#ship_dep').val() != $('#ship_tot').val()){
-					alert("입금액합계와 합계금액이 다릅니다.");
+					//alert("입금액합계와 합계금액이 다릅니다.");
+	 				Swal.fire("입금액합계와 합계금액이 다릅니다.");
 					return false;
 				}
 				if(regex.test($('#take_usermail').val()) == false){
-	                alert("거래처 E-MAIL을 입력해 주세요.");
+	                //alert("거래처 E-MAIL을 입력해 주세요.");
+	 				Swal.fire("거래처 E-MAIL을 입력해 주세요.");
 					return false;
 				}
 				
 				if($("#holdingListTable input[type='checkbox']").is(":checked") == false) {
-					alert("홀드해제할 컨테이너를 선택하지 않았습니다.\n[Holding List] 항목을 확인하세요.");
+					//alert("홀드해제할 컨테이너를 선택하지 않았습니다.\n[Holding List] 항목을 확인하세요.");
+	 				Swal.fire("홀드해제할 컨테이너를 선택하지 않았습니다.\n[Holding List] 항목을 확인하세요.");
 					return false;						
 				}
 
@@ -1036,7 +1080,8 @@
 				}
 				
 				if(ckCount == 0){
-					alert("[Holding List]에서 컨테이너를 선택해주세요.");
+					//alert("[Holding List]에서 컨테이너를 선택해주세요.");
+	 				Swal.fire('[Holding List]에서 컨테이너를 선택해주세요.');
 				}
 				else{					
 					for(var i=0; i<$('#holdingListTable tbody tr').length; i++){
@@ -1074,5 +1119,4 @@
 			document.Form.submit();
 		} 		
 	</script>
-</body>
 </html>
