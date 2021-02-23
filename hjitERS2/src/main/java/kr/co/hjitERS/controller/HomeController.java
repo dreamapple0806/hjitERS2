@@ -3,6 +3,7 @@ package kr.co.hjitERS.controller;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -12,18 +13,27 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
+
+import kr.co.hjitERS.service.dao.LoginDAO;
 
 @Controller
 @Transactional
 public class HomeController {
 
 	private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
+
+	@Resource(name = "loginService")
+	private LoginDAO loginService;
 	
 	@RequestMapping(value = "/") 
-	public String index(HttpServletRequest request, HttpServletResponse response) throws IOException {
+	public String index(HttpServletRequest request, HttpServletResponse response, ModelAndView mav) throws Exception {
 		logger.info("HomeController");
-
+		String dayProcessCount = loginService.dayProcessCount();
+				
 		HttpSession session = request.getSession();
+		session.setAttribute("dayProcessCount", dayProcessCount);
+		
     	if(session.getAttribute("userInfo") == null) {
             return "/index";
     	}

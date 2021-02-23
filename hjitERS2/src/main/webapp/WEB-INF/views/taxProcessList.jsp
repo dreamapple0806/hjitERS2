@@ -36,7 +36,7 @@
 	<nav class="navbar navbar-expand-lg navbar-light bg-light">
 		<a class="navbar-brand" href="./taxProcess.do">
 			<img alt="한진인천컨테이너터미널" src="http://www.hjit.co.kr/homepage/kor/_Img/Common/logo.png" />&nbsp;
-			<font style="font-style: normal; font-weight: bold; vertical-align:middle;">정산서비스 시스템</font>
+			<font style="font-style: normal; font-weight: bold; vertical-align:middle;">정산서비스시스템</font>
 		</a>
 		<button class="navbar-toggler" type="button" data-toggler="collapse">
 			<span class="navbar-toggler-icon"></span>
@@ -48,9 +48,9 @@
 			</ul>
 		</div>
 		<form method="post" name="logoutForm" method="post">
-		<div class="float-right">
-			<button type="button" class="btn btn btn-danger" onclick="logout()">로그아웃</button>
-		</div>
+			<div class="float-right" style="padding-right:5px;">
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button type="button" class="btn btn btn-danger" onclick="logout()">로그아웃</button>
+			</div>
 		</form>
 	</nav>
 	<div class="card bg-light mt-4">

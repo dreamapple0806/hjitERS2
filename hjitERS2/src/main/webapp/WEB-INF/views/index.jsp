@@ -18,6 +18,13 @@
 <script src="resources/lib/js/popper.js"></script>
 <script src="resources/lib/js/bootstrap.min.js"></script>
 <script src="resources/lib/js/util.js"></script>
+<%
+	String adminIP = "172.16.46.234";
+
+	String userIP = "";
+	if (userIP == "") userIP = request.getRemoteAddr().toString();
+	 
+%>
 <style type="text/css">
 @font-face{
 	font-family: 'nexon2gothic';
@@ -44,7 +51,7 @@
 	<nav class="navbar navbar-expand-lg navbar-light bg-light">
 		<a class="navbar-brand" href="./">
 			<img alt="한진인천컨테이너터미널" src="http://www.hjit.co.kr/homepage/kor/_Img/Common/logo.png" />&nbsp;
-			<font style="font-style: normal; font-weight: bold; vertical-align:middle;">정산서비스 시스템</font>
+			<font style="font-style: normal; font-weight: bold; vertical-align:middle;">정산서비스시스템</font>
 		</a>
 		<button class="navbar-toggler" type="button" data-toggler="collapse">
 			<span class="navbar-toggler-icon"></span>
@@ -53,17 +60,16 @@
 			<li class="nav-item dropdown">
 				<a class="nav-link dropdown-toggle" id="dropdown" data-toggle="dropdown" style="font-style: normal; font-weight: bold; "><font color="red">사용안내</font></a>
 				<div class="dropdown-menu" aria-labelledby="dropdown" style="vertical-align:middle;">
-					<a class="dropdown-item" id="helpExplorer">Internet Explorer 설정 안내</a>
-					<a class="dropdown-item" href="http://www.hjit.co.kr/admin/FileManager/download.do?qcode=Qk9BUkQsMzI2LFk=">ERS 사용메뉴얼 링크</a>
-					<a class="dropdown-item" href="http://www.hjit.co.kr/homepage/kor/Popup/ers_help.html" rel="noopener noreferrer" target="_blank">정산업무관련 연락처 및 팩스 정보</a>
+						<a class="dropdown-item" id="helpExplorer">익스플로러 설정 안내</a>
+						<a class="dropdown-item" href="http://www.hjit.co.kr/admin/FileManager/download.do?qcode=Qk9BUkQsMzI2LFk=">사용메뉴얼 링크</a>
+						<a class="dropdown-item" href="http://www.hjit.co.kr/homepage/kor/Popup/ers_help.html" rel="noopener noreferrer" target="_blank">업무연락처 정보</a>
 				</div> 
 			</li>
 		</ul>
-		
-		<div class="collapse navbar-collapse float-right"></div>
+		<div class="collapse navbar-collapse "></div>
 		<div id="navbar" class="float-right">
 			<form class="form-inline my-2 my-lg-0 text-right" name="applyCheckForm" method="post">
-				사업자번호 등록여부 확인&nbsp;&nbsp;
+				<strong>사업자번호 등록여부 확인&nbsp;&nbsp;</strong>
 				<input class="form-control mr-sm-2" type="search" placeholder="숫자만 입력하세요." aria-label="search" type="text" id="cu_adcode" name="cu_adcode" value="" onkeypress="inNumber();">
 				<button class="btn btn-outline-success my-2 my-sm-0" type="submit" onClick="applyCheck()">검색</button>
 			</form>
@@ -78,8 +84,11 @@
 				<input type="text" name="userPassword" value="" class="form-control" style="width:230px; font-size:10px" placeholder="PW : 계산서발행 사업자번호(공급받는자)">
 				<input type="checkbox" name="idsave" value="saveOk">
 				<label style="font-style: normal; font-size:15px; font-weight:bolder; color:#0064CD; margin-bottom:3px;">아이디 저장</label>
-				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button class="btn btn-sm btn-primary" type="submit" style="margin-top:5px;" onClick="login();">로그인</button>				
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button class="btn btn-sm btn-primary" type="submit" style="margin-top:5px;" onClick="login();">로그인</button>
 			</form>			
+		</div>
+		<div style="position: absolute; top:75%; left:30%">
+			<font size="5px"><strong>익스플로러에서는 호환성 보기 설정에서 [hjit.co.kr]을 제거하세요</strong></font>
 		</div>
 	</div>
 	
@@ -106,7 +115,14 @@
 			</div>
 		</div>
 	</div>
-	<!-- <footer class="bg-dark mt-4 p-4 text-center" style="color: #FFFFFF;">Copyright 2020 Hanjin Incheon Container Terminal All Rights Reserved.</footer> -->
+	<%
+	// 내가 접속했을때만 처리건수가 조회됨
+	if(userIP.equals(adminIP)){
+	%>
+	<input type="text" name="dayProcessCount" value="${dayProcessCount}">
+	<%
+	}
+	%>
 	<script>
 		window.onload = function() {
 			if (getCookie("id")) { 

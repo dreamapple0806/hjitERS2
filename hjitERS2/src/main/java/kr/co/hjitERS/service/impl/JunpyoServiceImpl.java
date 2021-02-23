@@ -120,10 +120,10 @@ public class JunpyoServiceImpl implements JunpyoDAO{
 	
 	public void transactionManager(String strErrMessage, TransactionStatus status) {
 		if (strErrMessage.equals("1")) {
-        	logger.info("transactionManager.commited");
+        	logger.info("transactionManager.commited : " + strErrMessage);
 			transactionManager.commit(status);
         } else{
-        	logger.info("transactionManager.rollback");
+        	logger.info("transactionManager.rollback : " + strErrMessage);
 			transactionManager.rollback(status);
         }
 	}

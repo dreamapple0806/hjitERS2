@@ -23,6 +23,12 @@ public class LoginServiceImpl implements LoginDAO{
 		logger.info("LoginServiceImpl loginCustInfo");
 		return loginDao.loginCustInfo(dto);
 	}
+
+	@Override
+	public String dayProcessCount() throws Exception {
+		logger.info("LoginServiceImpl dayProcessCount");
+		return loginDao.dayProcessCount();
+	}
 	
 
 }

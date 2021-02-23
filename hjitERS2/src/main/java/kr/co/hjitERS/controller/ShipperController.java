@@ -114,10 +114,11 @@ public class ShipperController {
 				// 선택한 컨테이너 정보 조회
 				for(int i=0; i<holdContDataArray.size(); i++) {
 					JsonObject object = (JsonObject) holdContDataArray.get(i);
-					logger.info("prePayment : " + prePayment + " / bie_ship_contno : " + object.get("bie_ship_contno").getAsString());
+					logger.info("prePayment : " + prePayment + " / bie_ship_contno : " + object.get("bie_ship_contno").getAsString() + " / bie_ship_blno : " + object.get("bie_ship_blno").getAsString());
 					ShipperVO shipVO = new ShipperVO();
 					if(prePayment.equals("Y")) {
-						shipVO = shipperService.Search_PrePaymentCont_Select(object.get("bie_ship_contno").getAsString(), object.get("bie_ship_blno").getAsString(), prePayment);
+						shipVO = shipperService.Search_PrePaymentCont_SelectOne(object.get("bie_ship_contno").getAsString()
+								, object.get("bie_ship_blno").getAsString(), prePayment, object.get("bie_ship_hold").getAsString());
 						logger.info("ForeCast Container Info : " + shipVO.toString());		
 						holdContList.add(shipVO);
 					}
@@ -131,7 +132,8 @@ public class ShipperController {
 				// 가상계좌 입금내역 조회
 				for(int a=0; a<virAcctDataArray.size(); a++) {
 					JsonObject object = (JsonObject) virAcctDataArray.get(a);
-					InAccountManageVO iAccountMagVO = shipperService.holdPurchaseVirAccount(object.get("vir_acctno").getAsString(), object.get("tran_dd").getAsString(), object.get("tran_hh").getAsString());
+					InAccountManageVO iAccountMagVO = shipperService.holdPurchaseVirAccount(object.get("vir_acctno").getAsString(), object.get("tran_dd").getAsString()
+							, object.get("tran_hh").getAsString(), object.get("incom_amount").getAsString(), object.get("vatrsno").getAsString());
 					logger.info("Virtual Account Info : " + iAccountMagVO.toString());
 					virAcctList.add(iAccountMagVO);
 				}
@@ -140,7 +142,8 @@ public class ShipperController {
 				// (BIE_SHIP_POINT null, BIE_SHIP_HOLD null, BIE_SHIP_SEQ 1,  BIE_SHIP_PAYMENT 1, BIE_SHIP_ERPCONFIRM 1)
 				for(int i=0; i<holdContList.size(); i++) {
 					ShipperVO shipVO = (ShipperVO) holdContList.get(i);
-					infCount += shipperService.searchCntInf(FormatUtil.nvl(shipVO.getBie_ship_contno(), ""), FormatUtil.nvl(shipVO.getBie_ship_blno(), ""));
+					infCount += shipperService.searchCntInf(FormatUtil.nvl(shipVO.getBie_ship_contno(), ""), FormatUtil.nvl(shipVO.getBie_ship_blno(), "")
+							, FormatUtil.nvl(shipVO.getBie_ship_point(), ""), FormatUtil.nvl(shipVO.getBie_ship_hold(), ""), FormatUtil.nvl(shipVO.getBie_ship_seq(), ""));
 					logger.info("Container Interface Count : " + infCount);
 				}
 				
@@ -205,11 +208,11 @@ public class ShipperController {
 			SerialSubVO beanSub = new SerialSubVO();
 			
 			beanSub.setGubun("01");
-			beanSub.setShip_contno(FormatUtil.nvl(shipVO.getBie_ship_contno(), " "));
+			beanSub.setShip_contno(FormatUtil.nvl(shipVO.getBie_ship_contno(), ""));
 			beanSub.setShip_point(FormatUtil.nvl(shipVO.getBie_ship_point(), " "));
 			beanSub.setShip_hold(FormatUtil.nvl(shipVO.getBie_ship_hold(), " "));
 			beanSub.setShip_seq(FormatUtil.nvl(shipVO.getBie_ship_seq(), " "));
-			beanSub.setShip_blno(FormatUtil.nvl(shipVO.getBie_ship_blno(), " "));
+			beanSub.setShip_blno(FormatUtil.nvl(shipVO.getBie_ship_blno(), ""));
 			beanSub.setShip_refno(FormatUtil.nvl(shipVO.getBie_ship_refno(), " "));
 			beanSub.setShip_refno2(FormatUtil.nvl(shipVO.getBie_ship_refno2(), " "));
 			beanSub.setShip_personal(FormatUtil.nvl(shipVO.getBie_ship_personal(), " "));
@@ -221,10 +224,10 @@ public class ShipperController {
 			beanSub.setShip_count(FormatUtil.nvl(shipVO.getBie_ship_count(), " "));
 			beanSub.setShip_unit(FormatUtil.nvl(shipVO.getBie_ship_unit(), " "));
 			beanSub.setShip_qty(FormatUtil.nvl(shipVO.getBie_ship_qty(), " "));
-			beanSub.setShip_rate(FormatUtil.nvl(shipVO.getBie_ship_rate(), " "));
-			beanSub.setShip_total(FormatUtil.nvl(shipVO.getBie_ship_total(), " "));
-			beanSub.setShip_amount(FormatUtil.nvl(shipVO.getBie_ship_amount(), " "));
-			beanSub.setShip_vat_amt(FormatUtil.nvl(shipVO.getBie_ship_vat(), " "));
+			beanSub.setShip_rate(FormatUtil.nvl(shipVO.getBie_ship_rate(), "0"));
+			beanSub.setShip_total(FormatUtil.nvl(shipVO.getBie_ship_total(), "0"));
+			beanSub.setShip_amount(FormatUtil.nvl(shipVO.getBie_ship_amount(), "0"));
+			beanSub.setShip_vat_amt(FormatUtil.nvl(shipVO.getBie_ship_vat(), "0"));
 			beanSub.setShip_driver_name(FormatUtil.nvl(shipVO.getBie_ship_driver_name(), " "));
 			beanSub.setShip_driver_hp(FormatUtil.nvl(shipVO.getBie_ship_driver_hp(), " "));
 			beanSub.setShip_truckno(FormatUtil.nvl(shipVO.getBie_ship_truckno(), " "));
@@ -234,7 +237,7 @@ public class ShipperController {
 			beanSub.setShip_invoiceno(FormatUtil.nvl(shipVO.getBie_ship_invoiceno(), " "));
 			beanSub.setShip_vesselname(FormatUtil.nvl(shipVO.getBie_ship_vesselname(), " "));
 			beanSub.setShip_arrive(FormatUtil.nvl(shipVO.getBie_ship_arrive(), " "));
-			beanSub.setShip_taxdate(FormatUtil.nvl(shipVO.getBie_ship_taxdate(), " "));
+			beanSub.setShip_taxdate(FormatUtil.nvl(shipVO.getBie_ship_taxdate(), ""));
 			beanSub.setInuser(FormatUtil.nvl(vo.getCu_code(), " "));
 			beanSub.setIndate(FormatUtil.nvl(dateFormat.format(date), " "));
 			beanSub.setSale_class("20");

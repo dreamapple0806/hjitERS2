@@ -18,12 +18,13 @@ public class AuthInterceptor extends HandlerInterceptorAdapter{
 
         HttpSession session = request.getSession();
 
+        String mip = "172.16.46.234";
     	String ip = request.getHeader("X-Forwarded-For");
         if (ip == null) ip = request.getRemoteAddr();
         
         if(session.getAttribute("userInfo") != null) {
     		logger.info("Session Information is exist : " + session.getAttribute("userInfo"));
-    		logger.info("IP Information is " + ip);
+    		logger.info("IP Information is " + ip + " / " + (ip.equals(mip)));
         	logger.info("+++++ AuthInterceptor Pre Controller End +++++");	
             
             return true; 

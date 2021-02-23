@@ -49,11 +49,11 @@ public class LoginController {
 	        CustVO vo = loginService.loginCustInfo(lvo);
 	         
 	        if(vo == null) {
-				logger.info("로그인 세션이 끊어졌습니다.");
-		    	mav.addObject("message", "로그인 세션이 끊어졌습니다.");
+				logger.info("사용자 정보가 없습니다.");
+		    	mav.addObject("message", "사용자 정보가 없습니다.");
 				mav.setViewName("index");
 				
-	    		message = "로그인 세션이 끊어졌습니다.";
+	    		message = "사용자 정보가 없습니다.";
 	    		FormatUtil.alertFunction(response, message);
 			}       
 			else {

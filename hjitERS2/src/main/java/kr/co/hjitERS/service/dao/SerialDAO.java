@@ -23,6 +23,7 @@ public interface SerialDAO {
 	int updateProgress(@Param("istcd") String istcd, @Param("vir_acctno") String vir_acctno, @Param("tran_dd") String tran_dd
 	, @Param("tran_hh") String tran_hh, @Param("vatrsno") String vatrsno, @Param("serial") String serial
 	, @Param("vatramt") String vatramt) throws Exception;
+	String getNewSerialSequence();
 	
 	
 }

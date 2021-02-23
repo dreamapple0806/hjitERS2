@@ -24,6 +24,7 @@
 <script src="resources/lib/js/bootstrap.min.js"></script>
 <script src="resources/lib/js/util.js"></script>
 <script src="resources/lib/jsDelivr/sweetalert2.all.min.js"></script>
+<script src="resources/lib/jsDelivr/promise.min.js"></script>
 
 <style>
 	.swal2-title{
@@ -43,7 +44,7 @@
 	<nav class="navbar navbar-expand-lg navbar-light bg-light">
 		<a class="navbar-brand" href="./taxProcess.do">
 			<img alt="한진인천컨테이너터미널" src="http://www.hjit.co.kr/homepage/kor/_Img/Common/logo.png" />&nbsp;
-			<font style="font-style: normal; font-weight: bold; vertical-align:middle;">정산서비스 시스템</font>
+			<font style="font-style: normal; font-weight: bold; vertical-align:middle;">정산서비스시스템</font>
 		</a>
 		<button class="navbar-toggler" type="button" data-toggler="collapse">
 			<span class="navbar-toggler-icon"></span>
@@ -55,15 +56,51 @@
 			</ul>
 		</div>
 		<div class="float-right">
-			<a href="http://www.hjit.co.kr/admin/FileManager/download.do?qcode=Qk9BUkQsMzI2LFk="><button type="button" class="btn btn btn-primary">사용메뉴얼</button></a>
-			&nbsp;&nbsp;<button type="button" class="btn btn btn-danger" onclick="logout()">로그아웃</button>
+			<ul class="navbar-nav mr-auto">
+				<li class="nav-item dropdown">
+					<a class="nav-link dropdown-toggle" id="dropdown" data-toggle="dropdown" style="font-style: normal; font-weight: bold; "><font size="3">사용안내</font></a>
+					<div class="dropdown-menu" aria-labelledby="dropdown" style="vertical-align:middle;">
+						<a class="dropdown-item" id="helpExplorer"><img src="resources/image/browser-2x.png">&nbsp;익스플로러 설정 안내</a>
+						<a class="dropdown-item" href="http://www.hjit.co.kr/admin/FileManager/download.do?qcode=Qk9BUkQsMzI2LFk="><img src="resources/image/file-2x.png">&nbsp;사용메뉴얼 링크</a>
+						<a class="dropdown-item" href="http://www.hjit.co.kr/homepage/kor/Popup/ers_help.html" rel="noopener noreferrer" target="_blank"><img src="resources/image/phone-2x.png">&nbsp;업무연락처 정보</a>
+					</div> 
+				</li>
+			</ul>
+		</div>
+		<div class="float-right" style="padding-right:5px;">
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button type="button" class="btn btn btn-danger" onclick="logout()">로그아웃</button>
 		</div>
 	</nav>
+	
+	<!-- 모달 영역 -->
+	<div id="helpExplorerDetail" class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="helpExplorerDetail">
+		<div class="modal-dialog modal-lg" style="max-width: 100%; width: auto; display: table;" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title" id="myModalLabel">Internet Explorer 접속시 설정 안내</h4>
+				</div>
+				<div class="modal-body">
+				<h3>1. 도구 메뉴에서 호환성 보기 선택</h3><br>
+				<img src="http://www.hjit.co.kr/admin/FileManager/download.do?qcode=Qk9BUkQsMzMyLFk=" alt="My Image">
+				<br><br>
+				<h3>2. 호환성 보기 목록에서 [hjit.co.kr] 제거</h3><br>
+				<img src="http://www.hjit.co.kr/admin/FileManager/download.do?qcode=Qk9BUkQsMzM2LFk=" alt="My Image">
+				<br><br>
+				<h3>3. 페이지 정상표시 확인</h3><br>
+				<img src="http://www.hjit.co.kr/admin/FileManager/download.do?qcode=Qk9BUkQsMzM0LFk=" alt="My Image">
+				</div>
+				<div class="modal-footer">
+					<button type="button" data-dismiss="modal" class="btn btn-primary">확인</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	
 	<form method="post" id="Form" name="Form" method="post">		
-			<input type="hidden" id="holdContData" name="holdContData" value="" />
-			<input type="hidden" id="virAcctData" name="virAcctData" value="" />
-			<input type="hidden" id="demurrage" name="demurrage" value="" />
-			<input type="hidden" id="sessionUserInfo" name="sessionUserInfo" value="<%=session.getAttribute("userInfo") %>" />
+		<input type="hidden" id="holdContData" name="holdContData" value="" />
+		<input type="hidden" id="virAcctData" name="virAcctData" value="" />
+		<input type="hidden" id="demurrage" name="demurrage" value="" />
+		<input type="hidden" id="sessionUserInfo" name="sessionUserInfo" value="<%=session.getAttribute("userInfo") %>" />
 			
 	<div class="card bg-light mt-4 container">		
 		<div class="card-header bg-light show-grid">
@@ -200,6 +237,13 @@
         						<button type="button" class="btn-sm btn btn-warning" id="apply" name="apply" onclick="javascript:onApply();">적용</button>
         					</td>
       					</tr>
+	      				<tr class="text-center">
+	      					<td colspan="5">
+	      						<strong>
+	      						※ 조회 결과가 없는 경우, 터미널 홈페이지 <a href="http://59.17.254.10:9130/esvc/" target="_blank">정보서비스</a>를 통해 컨테이너 [홀드정보] 또는 [비용발생여부]를 확인하시기 바랍니다.
+	      						</strong>
+	      					</td>
+	      				</tr>
     				</tbody>
   				</table>
 			</div>
@@ -207,7 +251,8 @@
 	</div>
 	<div class="card bg-light mt-4 container" id="searchHoldList" style="height:310px;  display:none">
 		<div class="card-header bg-light show-grid" style="padding:1rem .85rem;">
-			<table class="table-bordered table-condensed table-hover" id="unProcHoldingListTable" style="border-collapse: collapse; display: block; font-size:9pt; margin:auto; table-layout:fixed;">
+			<table class="table-bordered table-condensed table-hover" id="unProcHoldingListTable" 
+			style="border-collapse: collapse; display: block; font-size:9pt; margin:auto; table-layout:fixed;">
     			<thead>
       				<tr class="text-center text-truncate">
         				<th style="width:45px; height:35px;">No</th>
@@ -435,10 +480,20 @@
 			Swal.fire({ 
 				icon: 'success', // Alert 타입 
 				title: '익스플로러에서는 호환성 보기 메뉴에서\n[hjit.co.kr] 항목을 제거해주기 바랍니다.', // Alert 제목 
-				text: '사용 오류 문의 : 032 - 202 - 4922' // Alert 내용 
+				text: '사용 문의 : 032 - 202 - 4922' // Alert 내용 
 			}); 
 		});
-	
+		
+		// 모달 버튼에 이벤트를 건다.
+		$('#helpExplorer').on('click', function(){
+			$('#helpExplorerDetail').modal('show');
+		});
+		
+		// 모달 안의 취소 버튼에 이벤트를 건다.
+		$('#helpExplorer').on('click', function(){
+			$('#helpExplorerDetail').modal('hide');
+		});		
+		
 		function betaAlert(){
 			alert("해당 사이트는 크롬 브라우저를 위한 테스트 사이트 입니다. \n정산처리 후, 오류발생시 연락바랍니다. (TEL. 032-202-4922)");
 		}
@@ -479,7 +534,6 @@
  			}
 	 		
  			if(ck.value == 1){
- 				//alert("환불 및 주의사항에 동의 하셨습니다.");	
  				Swal.fire({ 
 					title: '환불 및 주의사항에 동의 하셨습니다' // Alert 제목                         
  		        }).then(function(){
@@ -489,8 +543,7 @@
 				});
  			}
  			else{
-				//alert("환불 및 주의사항 동의에 취소하셨습니다.");
- 				Swal.fire('환불 및 주의사항 동의에 취소하셨습니다.');
+				Swal.fire('환불 및 주의사항 동의에 취소하셨습니다.');
 				$("#agreeChk").text('동의');
  			}
 	 	}
@@ -498,6 +551,7 @@
 		// 홀드해제 컨테이너 조회 1
 		function SearchContActionJson(){
 			var today = getTodate();
+        	var afterTen = getAfterDay();
 			var selectedDate = document.getElementById("bie_ship_symd_shr").value.replace(/-/gi, '');
 			var bie_ship_contno_shr = document.getElementById("bie_ship_contno_shr").value;
 			var bie_ship_blno_shr = document.getElementById("bie_ship_blno_shr").value;	
@@ -505,32 +559,31 @@
 			
 			if($("input:radio[name=prePaidY]:checked").val() == "Y"){
 				if(today > selectedDate){
-	        		//alert("반출일자가 현재일자보다 오래되었습니다. 반출일자를 확인해주세요.");
-	 				Swal.fire('반출일자가 현재일자보다 오래되었습니다. 반출일자를 확인해주세요.');
+	        		Swal.fire('반출일자가 현재일자보다 오래되었습니다. 반출일자를 확인해주세요.');
 	        		return false;
 	        	}
 				
 				if(today == selectedDate){
-	        		//alert("반출일자와 현재일자가 동일합니다. 반출일자를 확인해주세요.");
-	 				Swal.fire('반출일자와 현재일자가 동일합니다. 반출일자를 확인해주세요.');
+	        		Swal.fire('반출일자와 현재일자가 동일합니다. 반출일자를 확인해주세요.');
+	        		return false;
+	        	}
+				
+				if(afterTen < selectedDate){
+	        		Swal.fire('사전납부 반출일자는 최대 10일 입니다.\n10일 이내로 선택해주세요');
 	        		return false;
 	        	}
 				
 	        	if(bie_ship_contno_shr == "" && bie_ship_blno_shr == "") {
-					//alert("컨테이너 번호 또는 계산서 번호를 입력해 주세요.");
-	 				Swal.fire('컨테이너 번호 또는 BL 번호를 입력하세요.');
-					
-					f.bie_ship_contno_shr.focus();
+					Swal.fire('컨테이너 번호 또는 BL 번호를 입력하세요.');
 					return false;
 				}
-
+	        	
         		ReleaseContProcess("SearchPreContActionJson.do");	
 	            return false;	
 			}
 			else{
 	        	if(bie_ship_contno_shr == "" && bie_ship_blno_shr == "") {
-					//alert("컨테이너 번호 또는 계산서 번호를 입력해 주세요.");
-	 				Swal.fire('[컨테이너 번호] 또는 [BL 번호]를 입력하세요.');
+					Swal.fire('[컨테이너 번호] 또는 [BL 번호]를 입력하세요.');
 					f.bie_ship_contno_shr.focus();
 					return false;
 				}
@@ -642,13 +695,9 @@
 		            	
 		            }
 		            else{
-			        	//alert('조회 결과가 없습니다.');
-		 				Swal.fire('조회 결과가 없습니다.');
+			        	Swal.fire('조회 결과가 없습니다.');
 		            }
 		        },error:function(request,status,error){
-		        	var console = window.console || {log:function(){}};
-		        	console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
-		        	//alert("로그인 세션이 끊어졌습니다.");
 		        	Swal.fire(
 		        			  '로그인 세션이 끊어졌습니다.',
 		        			  '다시 로그인 해주세요.',
@@ -684,10 +733,31 @@
     						'<td style="width:75px; height:35px;"></td>' +
     						'<td style="width:75px; height:35px;"></td>' +
       					'</tr>');	
-               }                   
+               }                            		
+                $('#holdingListTable > tbody').empty(); 
+                
+                for(var a=0; a<11; a++){
+                	$('#holdingListTable > tbody:last').append(
+                			'<tr class="text-center text-truncate" style="height:35px;">' + 
+            				'<td style="width:40px; height:35px;"></td>' + 
+            				'<td style="width:100px; height:35px;"></td>' + 
+            				'<td style="width:100px; height:35px;"></td>' + 
+            				'<td style="width:100px; height:35px;"></td>' + 
+            				'<td style="width:120px; height:35px;"></td>' +     					        					
+            				'<td style="width:120px; height:35px;"></td>' + 
+            				
+            				'<td style="width:80px; height:35px;"></td>' + 
+            				'<td style="width:80px; height:35px;"></td>' + 
+            				'<td style="width:80px; height:35px;"></td>' + 
+            				'<td style="width:90px; height:35px;"></td>' +     					        					
+            				'<td style="width:90px; height:35px;"></td>' + 
+            				'<td style="width:90px; height:35px;"></td>' + 
+          				'</tr>');	
+               }                    
 			} else if(useCk > 1){
 				document.getElementById('bie_ship_symd_shr').disabled=true;
-                $('#unProcHoldingListTable > tbody').empty();
+                $('#unProcHoldingListTable > tbody').empty();        		
+                $('#holdingListTable > tbody').empty();
                 
                 for(var a=0; a<11; a++){
                 	$('#unProcHoldingListTable > tbody:last').append('<tr class="text-center text-truncate">' + 
@@ -709,15 +779,54 @@
     						'<td style="width:75px; height:35px;"></td>' +
       					'</tr>');	
                }
+         		
+                $('#holdingListTable > tbody').empty();
+                for(var a=0; a<11; a++){
+                	$('#holdingListTable > tbody:last').append(
+                			'<tr class="text-center text-truncate" style="height:35px;">' + 
+            				'<td style="width:40px; height:35px;"></td>' + 
+            				'<td style="width:100px; height:35px;"></td>' + 
+            				'<td style="width:100px; height:35px;"></td>' + 
+            				'<td style="width:100px; height:35px;"></td>' + 
+            				'<td style="width:120px; height:35px;"></td>' +     					        					
+            				'<td style="width:120px; height:35px;"></td>' + 
+            				
+            				'<td style="width:80px; height:35px;"></td>' + 
+            				'<td style="width:80px; height:35px;"></td>' + 
+            				'<td style="width:80px; height:35px;"></td>' + 
+            				'<td style="width:90px; height:35px;"></td>' +     					        					
+            				'<td style="width:90px; height:35px;"></td>' + 
+            				'<td style="width:90px; height:35px;"></td>' + 
+          				'</tr>');	
+               }               
 			} 
 	    }
-      	
+
+		function getAfterDay(){
+			var date = new Date();
+			date.setDate(date.getDate()+10);
+		    var year = date.getFullYear();
+		    var month = date.getMonth()+1;
+		    var day = date.getDate();
+		    if(month < 10){
+		        month = "0"+month;
+		    }
+		    if(day < 10){
+		        day = "0"+day;
+		    }
+		 
+		    var today = year+""+month+""+day;
+		    
+		    return today;
+		}
+ 		
       	//적용버튼 선택시 선택된 미처리홀딩리스트를 홀딩리스트 테이블에 복사
         function onApply(){	
       		var count = 0;
       		var totalAmt = Number($('#ship_amt').val().replace(",",""));
       		var totalVat = Number($('#ship_vat').val().replace(",",""));
       		var total = Number($('#ship_tot').val().replace(",",""));
+        	var afterTen = getAfterDay();
       		
 			for (var i = 1; i < $('#unProcHoldingListTable tbody tr').length; i++) {
 				var unProcContno = $('#unProcHoldingListTable tr').eq(i).attr('bie_ship_contno');
@@ -735,6 +844,11 @@
 				    var equalChk = procHoldingListChk(unProcContno, unProcPoint, unProcHold, unProcSeq, unProcLimit);
 				    
 				    if(equalChk == false){
+				    	break;
+				    }
+				    
+				    if(unProcLimit.replace(/-/gi, '') >= afterTen){
+				    	Swal.fire("최대 사전납부 기한은 10일 입니다. \n10일 이내로 선택해주세요.");
 				    	break;
 				    }
 				    
@@ -820,8 +934,7 @@
 					&& (unProcSeq == procSeq) 
 					&& (unProcLimit == procLimit)
 				){				
-					//alert("[" + unProcContno + "] " + j + "번째 라인에 이미 적용된 컨테이너 입니다.");
-	 				Swal.fire('[' + unProcContno + '] ' + j + '번째 라인에 이미 적용된 컨테이너 입니다.');
+					Swal.fire('[' + unProcContno + '] ' + j + '번째 라인에 이미 적용된 컨테이너 입니다.');
 					return false;
 				}
 			}
@@ -905,8 +1018,7 @@
 				$('#ship_tot').val(numberFormat(tot));
 				
         		if(ckCnt == 0){
-        			//alert("삭제할 컨테이너를 선택하세요.");
-	 				Swal.fire('삭제할 컨테이너를 선택하세요.');
+        			Swal.fire('삭제할 컨테이너를 선택하세요.');
         		}
             	
         	})
@@ -969,14 +1081,10 @@
 		            	$("#virAcctListTable > tbody").html(html);
 		            }
 		            else{
-			        	//alert('조회 결과가 없습니다.');
-		 				Swal.fire('조회 결과가 없습니다.');
+			        	Swal.fire('조회 결과가 없습니다.');
 		            }
 		        },
 		        error:function(request,status,error){
-		        	var console = window.console || {log:function(){}};
-		        	console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
-		        	//alert("로그인 세션이 끊어졌습니다.");
 		        	Swal.fire(
 		        			  '로그인 세션이 끊어졌습니다.',
 		        			  '다시 로그인 해주세요.',
@@ -1007,18 +1115,15 @@
 				var regex=/^[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/;
 	 			
 				if($('#cu_code').val() == ""){
-	                //alert("거래처를 입력해 주세요.");
-	 				Swal.fire("거래처를 입력해 주세요.");
+	                Swal.fire("거래처를 입력해 주세요.");
 	                return false;
 				}
 				if($('#cu_adcode').val() == ""){
-	                //alert("사업자번호를 입력해 주세요.");
-	 				Swal.fire("사업자번호를 입력해 주세요.");
+	                Swal.fire("사업자번호를 입력해 주세요.");
 					return false;
 				}
 				if($('#ship_dep').val() != $('#ship_tot').val()){
-					//alert("입금액합계와 합계금액이 다릅니다.");
-	 				Swal.fire("입금액합계와 합계금액이 다릅니다.");
+					Swal.fire("입금액합계와 합계금액이 다릅니다.");
 					return false;
 				}
 				if(regex.test($('#take_usermail').val()) == false){
@@ -1028,8 +1133,7 @@
 				}
 				
 				if($("#holdingListTable input[type='checkbox']").is(":checked") == false) {
-					//alert("홀드해제할 컨테이너를 선택하지 않았습니다.\n[Holding List] 항목을 확인하세요.");
-	 				Swal.fire("홀드해제할 컨테이너를 선택하지 않았습니다.\n[Holding List] 항목을 확인하세요.");
+					Swal.fire("홀드해제할 컨테이너를 선택하지 않았습니다.\n[Holding List] 항목을 확인하세요.");
 					return false;						
 				}
 
@@ -1051,7 +1155,9 @@
 	        			var virAcctObject = new Object();	
 	        			virAcctObject.vir_acctno = $('#virAcctListTable tbody tr').eq(i).attr('vir_acctno');
 	        			virAcctObject.tran_dd = $('#virAcctListTable tbody tr').eq(i).attr('tran_dd'); 
-	        			virAcctObject.tran_hh = $('#virAcctListTable tbody tr').eq(i).attr('tran_hh'); 
+	        			virAcctObject.tran_hh = $('#virAcctListTable tbody tr').eq(i).attr('tran_hh');  
+	        			virAcctObject.incom_amount = $('#virAcctListTable tbody tr').eq(i).attr('incom_amount'); 
+	        			virAcctObject.vatrsno = $('#virAcctListTable tbody tr').eq(i).attr('vatrsno'); 
 	        			virAcctArray.push(virAcctObject);
 					}
 	        	}
@@ -1080,14 +1186,14 @@
 				}
 				
 				if(ckCount == 0){
-					//alert("[Holding List]에서 컨테이너를 선택해주세요.");
-	 				Swal.fire('[Holding List]에서 컨테이너를 선택해주세요.');
+					Swal.fire('[Holding List]에서 컨테이너를 선택해주세요.');
 				}
 				else{					
 					for(var i=0; i<$('#holdingListTable tbody tr').length; i++){
 		        		if($('#holdingListTable tbody tr').eq(i).children().find('input[type="checkbox"]').is(':checked')){
 		        			var contObject = new Object();
 		        			contObject.bie_ship_contno = $('#holdingListTable tbody tr').eq(i).attr('bie_ship_contno');
+		        			contObject.bie_ship_hold = $('#holdingListTable tbody tr').eq(i).attr('bie_ship_hold');
 		        			contObject.bie_ship_holddesc = $('#holdingListTable tbody tr').eq(i).attr('bie_ship_holddesc');
 		        			contObject.bie_ship_type = $('#holdingListTable tbody tr').eq(i).attr('bie_ship_type');
 		        			contObject.bie_ship_count = $('#holdingListTable tbody tr').eq(i).attr('bie_ship_count');

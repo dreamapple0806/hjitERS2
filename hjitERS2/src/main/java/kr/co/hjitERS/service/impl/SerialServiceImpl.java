@@ -47,7 +47,8 @@ public class SerialServiceImpl implements SerialDAO{
 			status = transactionManager.getTransaction(def);	
     		
     		//	1. 계산서 번호 생성
-    		beanMain.setSerial(this.getNewSerial(beanMain.getIssue_date()));
+    		beanMain.setSerial(this.getNewSerialSequence());
+    		logger.info("getNewSerial : " + beanMain.getSerial());
     		
     		//	2. 헤더저장
     		strErrMessage = String.valueOf(insertShipperMain(beanMain));
@@ -106,14 +107,16 @@ public class SerialServiceImpl implements SerialDAO{
                 	SerialSubVO beanSub = (SerialSubVO) lstDataSub.get(curRow);
                 	beanSub.setOption("save");
                 	strErrMessage = String.valueOf(serialDAO.infupdate(beanSub));
-                	logger.info("serialDAO.infupdate Result : " + strErrMessage);
+                	logger.info("serialDAO.infupdate Result6 : " + strErrMessage);
                 }
+	        	strErrMessage = "1";
             } else{
             	strErrMessage = "미처리거래명세서 I/F UPDATE";
             	transactionManager(strErrMessage, status);
             	return strErrMessage;
             }
-            
+
+        	logger.info("67  : " + strErrMessage);
             //7. 입금내역 처리  process update(처리여부)
             if (strErrMessage.equals("1")) {
                 for ( int curRow = 0; curRow < lstDatainaccount.size(); curRow++ ) {
@@ -142,10 +145,10 @@ public class SerialServiceImpl implements SerialDAO{
 	
 	public void transactionManager(String strErrMessage, TransactionStatus status) {
 		if (strErrMessage.equals("1")) {
-        	logger.info("transactionManager.commited");
+        	logger.info("transactionManager.commited : " + strErrMessage);
 			transactionManager.commit(status);
         } else{
-        	logger.info("transactionManager.rollback");
+        	logger.info("transactionManager.rollback : " + strErrMessage);
 			transactionManager.rollback(status);
         }
 	}
@@ -167,6 +170,13 @@ public class SerialServiceImpl implements SerialDAO{
 			serialNo = sysDate;
 			return serialNo;
 		}
+	}
+	
+	@Override
+	public String getNewSerialSequence() {
+		String serialNo = serialDAO.getNewSerialSequence();
+		
+		return serialNo;
 	}
 	
 	@Override

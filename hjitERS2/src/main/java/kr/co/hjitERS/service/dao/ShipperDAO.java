@@ -12,12 +12,17 @@ public interface ShipperDAO {
 	ArrayList<ShipperVO> SearchContAction(@Param("bie_ship_contno_shr") String bie_ship_contno_shr, @Param("bie_ship_blno_shr") String bie_ship_blno_shr) throws Exception;
 	ArrayList<ShipperPreVO> SearchPreContAction(@Param("bie_ship_contno_shr") String bie_ship_contno_shr, @Param("bie_ship_blno_shr") String bie_ship_blno_shr, @Param("demurrage") String demurrage) throws Exception;
 	ArrayList<ShipperVO> Search_PrePaymentCont_Select(@Param("bie_ship_contno_shr") String bie_ship_contno_shr, @Param("bie_ship_blno_shr") String bie_ship_blno_shr) throws Exception;
-	ShipperVO Search_PrePaymentCont_Select(@Param("bie_ship_contno_shr") String bie_ship_contno_shr, @Param("bie_ship_blno_shr") String bie_ship_blno_shr, String prePayment) throws Exception;
+	ShipperVO Search_PrePaymentCont_SelectOne(@Param("bie_ship_contno_shr") String bie_ship_contno_shr, @Param("bie_ship_blno_shr") String bie_ship_blno_shr
+			, String prePayment, @Param("bie_ship_hold") String bie_ship_hold) throws Exception;
+	
 	ArrayList<InAccountManageVO> SearchVirAccountJson(@Param("cu_code") String cu_code) throws Exception;
 	
 	ShipperVO HoldContAction(@Param("bie_ship_contno") String bie_ship_contno, @Param("bie_ship_point") String bie_ship_point, @Param("bie_ship_hold") String bie_ship_hold, @Param("bie_ship_seq") String bie_ship_seq) throws Exception;
-	InAccountManageVO holdPurchaseVirAccount(@Param("vir_acctno") String vir_acctno, @Param("tran_dd") String tran_dd, @Param("tran_hh") String tran_hh);
-	int searchCntInf(@Param("bie_ship_contno") String bie_ship_contno, @Param("bie_ship_blno") String bie_ship_blno);
+	InAccountManageVO holdPurchaseVirAccount(@Param("vir_acctno") String vir_acctno, @Param("tran_dd") String tran_dd, @Param("tran_hh") String tran_hh
+			, @Param("incom_amount") String incom_amount, @Param("vatrsno") String vatrsno);
+	int searchCntInf(@Param("bie_ship_contno") String bie_ship_contno, @Param("bie_ship_blno") String bie_ship_blno
+			, @Param("bie_ship_point") String bie_ship_point, @Param("bie_ship_hold") String bie_ship_hold
+			, @Param("bie_ship_seq") String bie_ship_seq);
 	
 	int searchCnt(@Param("ship_contno") String ship_contno, @Param("ship_point") String ship_point
 			, @Param("ship_hold") String ship_hold, @Param("ship_seq") String ship_seq

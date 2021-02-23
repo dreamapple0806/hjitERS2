@@ -5,4 +5,5 @@ import kr.co.hjitERS.vo.LoginVO;
 
 public interface LoginDAO {
 	CustVO loginCustInfo(LoginVO dto) throws Exception;
+	String dayProcessCount() throws Exception;
 }

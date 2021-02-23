@@ -23,6 +23,11 @@
 			and a.serial like '' || #{strDate} || '%'
 	</select>
 	
+	<select id="getNewSerialSequence" resultType="String" parameterType="String">
+		SELECT TO_CHAR(SYSDATE, 'YYYYMMDD')||LPAD(SERIAL_NUMBER.NEXTVAL, 4, '0') AS SERIAL
+		FROM DUAL
+	</select>
+	
 	<select id="getNewSerialSub" resultType="SerialSubVO" parameterType="String">
 		SELECT A.SERIAL, A.TRAN_SEQ, A.SHIP_CONTNO, A.SHIP_POINT, A.SHIP_HOLD 
 		      , A.SHIP_SEQ, A.SHIP_BLNO, A.SHIP_REFNO, A.SHIP_REFNO2, A.SHIP_PERSONAL 

@@ -3,7 +3,6 @@
 
 <!-- 맵핑될 DAO 인터페이스의 Full name 을 줍니다. -->
 <mapper namespace="kr.co.hjitERS.service.dao.LoginDAO">
-
 	<!-- id 속성은 DAO 의 메소드와 같아야 한다. 여기의 loginVO 는 mybatis-confg.xml 에 Alias 되어 있습니다. -->	
 	<select id="loginCustInfo" resultType="custVO" parameterType="String">
 		SELECT 
@@ -13,5 +12,13 @@
         FROM C_CUST A                              
         WHERE A.CU_GUBUN = '01'                       
         	AND A.CU_ADCODE = #{cu_adcode}            
+	</select>
+	
+	<select id="dayProcessCount" resultType="String" parameterType="String">
+		SELECT COUNT(*) AS dayProcessCount
+		FROM BILL_TRANS 
+		WHERE SUSER = '영업팀2' 
+		GROUP BY DT
+		HAVING DT = TO_CHAR(sysdate, 'YYYY-MM-DD')
 	</select>
 </mapper>

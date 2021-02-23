@@ -35,12 +35,60 @@
 	
 	<select id="SearchPreContAction" parameterType="string" statementType="CALLABLE">
 		{ 
-			CALL PRO_BILL_SHIPPER_HOLD_SEARCH(
+			CALL PRO_BILL_SHIPPER_HOLD_SEARCH(<choose>
+				<when test="bie_ship_contno_shr == 'NULL' ">
+				NULL
+				</when>
+				<otherwise>
 				#{bie_ship_contno_shr, mode=IN, jdbcType=NULL}
+				</otherwise>
+			</choose>
+			<choose>
+				<when test="bie_ship_blno_shr == 'NULL' ">
+				, NULL
+				</when>
+				<otherwise>
 				, #{bie_ship_blno_shr, mode=IN, jdbcType=NULL}
+				</otherwise>
+			</choose>
 				, #{demurrage, mode=IN, jdbcType=NULL}
 			)
 		}
+	</select>
+	
+	<select id="Search_PrePaymentCont_SelectOne" resultType="shipperVO" parameterType="String">
+		SELECT A.BIE_FCAST_CONTNO AS BIE_SHIP_CONTNO, A.BIE_FCAST_POINT AS BIE_SHIP_POINT, A.BIE_FCAST_HOLD AS BIE_SHIP_HOLD, A.BIE_FCAST_SEQ AS BIE_SHIP_SEQ 
+ 			, A.BIE_FCAST_BLNO AS BIE_SHIP_BLNO, '-' AS BIE_SHIP_REFNO, '-' AS BIE_SHIP_REFNO2, '-' AS BIE_SHIP_PERSONAL 
+ 			, A.BIE_FCAST_HOLDDESC AS BIE_SHIP_HOLDDESC, A.BIE_FCAST_VESSEL AS BIE_SHIP_VESSEL, A.BIE_FCAST_VOYAGE AS BIE_SHIP_VOYAGE, A.BIE_FCAST_OPERATOR AS BIE_SHIP_OPERATOR, A.BIE_FCAST_TYPE AS BIE_SHIP_TYPE 
+ 			, A.BIE_FCAST_COUNT AS BIE_SHIP_COUNT 
+ 			, A.BIE_FCAST_UNIT AS BIE_SHIP_UNIT, A.BIE_FCAST_QTY AS BIE_SHIP_QTY, A.BIE_FCAST_RATE AS BIE_SHIP_RATE 
+ 			, A.BIE_FCAST_TOTAL AS BIE_SHIP_TOTAL, A.BIE_FCAST_AMOUNT AS BIE_SHIP_AMOUNT, A.BIE_FCAST_VAT AS BIE_SHIP_VAT 
+ 			, A.BIE_FCAST_PAYMENT AS BIE_SHIP_PAYMENT, '-' AS BIE_SHIP_DRIVER_NAME, '-' AS BIE_SHIP_DRIVER_HP, '-' AS BIE_SHIP_TRUCKNO 
+ 			, A.BIE_FCAST_BASEDATE AS BIE_SHIP_BASEDATE, A.BIE_FCAST_LIMITDATE AS BIE_SHIP_LIMITDATE, '-' AS BIE_SHIP_TRAN_DATE, '-' AS BIE_SHIP_TRAN_TIME 
+ 			, '-' AS BIE_SHIP_USER, '-' AS BIE_SHIP_ERPCONFIRM, '-' AS BIE_SHIP_TAXDATE, BIE_FCAST_MRN AS BIE_SHIP_MRN 
+ 			, BIE_FCAST_INVOICENO AS BIE_SHIP_INVOICENO, A.BIE_FCAST_VESSEL AS BIE_SHIP_VESSELNAME, BIE_FCAST_ARRIVE AS BIE_SHIP_ARRIVE, '-' AS BIE_SHIP_REMARK 
+ 			, '-' AS BIE_SHIP_FLAG, '-' AS BIE_SHIP_COUNTDATE, '-' AS BIE_SHIP_OLDAMOUNT, '-' AS BIE_SHIP_ORDER, A.BIE_FCAST_DEMURRAGE AS BIE_SHIP_DEMURRAGE, A.BIE_FCAST_PINTIME AS BIE_SHIP_PINTIME
+ 		FROM BIE_FORECAST_INF A
+		WHERE 1=1
+			<choose>
+				<when test="bie_ship_contno_shr != '' and bie_ship_blno_shr == 'NULL' ">
+				AND A.BIE_FCAST_CONTNO = #{bie_ship_contno_shr}
+				AND A.BIE_FCAST_HOLD = #{bie_ship_hold}
+				ORDER BY A.BIE_FCAST_CONTNO, A.UPD_DT
+				</when>
+				
+				<when test="bie_ship_blno_shr != 'NULL' and bie_ship_contno_shr == 'NULL' ">
+				AND A.BIE_FCAST_BLNO = #{bie_ship_blno_shr}
+				AND A.BIE_FCAST_HOLD = #{bie_ship_hold}
+				ORDER BY A.BIE_FCAST_CONTNO, A.UPD_DT
+				</when>
+				
+				<otherwise>
+				AND A.BIE_FCAST_CONTNO = #{bie_ship_contno_shr} AND A.BIE_FCAST_BLNO = #{bie_ship_blno_shr}
+				AND A.BIE_FCAST_HOLD = #{bie_ship_hold}
+				ORDER BY A.BIE_FCAST_CONTNO, A.UPD_DT
+				</otherwise>
+			</choose>
 	</select>
 	
 	<select id="Search_PrePaymentCont_Select" resultType="shipperVO" parameterType="String">
@@ -58,14 +106,12 @@
  		FROM BIE_FORECAST_INF A
 		WHERE 1=1
 			<choose>
-				<!-- <when test='!bie_ship_contno_shr.equals("") and bie_ship_blno_shr.equals("")'> -->
 				<when test="bie_ship_contno_shr != '' and bie_ship_blno_shr == 'NULL' ">
 				AND A.BIE_FCAST_CONTNO = #{bie_ship_contno_shr}
 				ORDER BY A.BIE_FCAST_CONTNO, A.UPD_DT
 				</when>
 				
-				<!-- <when test='!bie_ship_blno_shr.equals("") and bie_ship_contno_shr.equals("")'> -->
-				<when test="bie_ship_blno_shr != 'NULL' and bie_ship_contno_shr == '' ">
+				<when test="bie_ship_blno_shr != 'NULL' and bie_ship_contno_shr == 'NULL' ">
 				AND A.BIE_FCAST_BLNO = #{bie_ship_blno_shr}
 				ORDER BY A.BIE_FCAST_CONTNO, A.UPD_DT
 				</when>
@@ -92,7 +138,9 @@
 			b.cu_gubun = '01' 
     		and a.vir_acctno = #{vir_acctno}
 			and a.tran_dd = #{tran_dd} 
-    		and a.tran_hh = #{tran_hh} 
+    		and a.tran_hh = #{tran_hh}  
+    		and a.incom_amount = #{incom_amount} 
+    		and a.vatrsno = #{vatrsno} 
 	</select>	
 	
 	<resultMap id="SearchVirAcctJsonResult" type="kr.co.hjitERS.vo.InAccountManageVO">		
@@ -175,9 +223,9 @@
 			<if test='!bie_ship_contno.equals("")'>
             	AND BIE_SHIP_CONTNO LIKE '%' || #{bie_ship_contno} || '%'
 			</if>
-    		and bie_ship_point = ''
-            and bie_ship_hold = ''
-            and bie_ship_seq = '1'
+    		and bie_ship_point = #{bie_ship_point}
+            and bie_ship_hold = #{bie_ship_hold}
+            and bie_ship_seq = #{bie_ship_seq}
 			<if test='!bie_ship_blno.equals("")'>
         	   and bie_ship_blno LIKE '%' || #{bie_ship_blno} || '%'
 			</if>
@@ -221,8 +269,22 @@
 	<select id="save_tosYsearch" parameterType="string" statementType="CALLABLE">
 		{ 
 			CALL PRO_BILL_SHIPPER_HOLD_SEARCH (
-				#{contno, mode=IN, jdbcType=VARCHAR}
-				, #{blno, mode=IN, jdbcType=VARCHAR}
+			<choose>
+				<when test="contno == 'NULL' || contno == ''">
+				NULL
+				</when>
+				<otherwise>
+			 	#{contno, mode=IN, jdbcType=NULL}
+				</otherwise>
+			</choose>
+			<choose>
+				<when test="blno == 'NULL' || blno == ''">
+				, NULL
+				</when>
+				<otherwise>
+				, #{blno, mode=IN, jdbcType=NULL}
+				</otherwise>
+			</choose>
 				, #{ship_limitdate, mode=IN, jdbcType=VARCHAR}
 			)
 		}

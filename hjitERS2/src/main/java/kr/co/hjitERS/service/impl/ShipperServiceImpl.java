@@ -44,13 +44,13 @@ public class ShipperServiceImpl implements ShipperDAO{
 	}
 
 	@Override
-	public InAccountManageVO holdPurchaseVirAccount(String vir_acctno, String tran_dd, String tran_hh) {
-		return shipperDAO.holdPurchaseVirAccount(vir_acctno, tran_dd, tran_hh);
+	public InAccountManageVO holdPurchaseVirAccount(String vir_acctno, String tran_dd, String tran_hh, String incom_amount, String vatrsno) {
+		return shipperDAO.holdPurchaseVirAccount(vir_acctno, tran_dd, tran_hh, incom_amount, vatrsno);
 	}
 
 	@Override
-	public int searchCntInf(String bie_ship_contno, String bie_ship_blno) {
-		return shipperDAO.searchCntInf(bie_ship_contno, bie_ship_blno);
+	public int searchCntInf(String bie_ship_contno, String bie_ship_blno, String bie_ship_point, String bie_ship_hold, String bie_ship_seq) {
+		return shipperDAO.searchCntInf(bie_ship_contno, bie_ship_blno, bie_ship_point, bie_ship_hold, bie_ship_seq);
 	}
 
 	@Override
@@ -99,10 +99,10 @@ public class ShipperServiceImpl implements ShipperDAO{
 	}
 
 	@Override
-	public ShipperVO Search_PrePaymentCont_Select(String bie_ship_contno_shr, String bie_ship_blno_shr,
-			String prePayment) throws Exception {
+	public ShipperVO Search_PrePaymentCont_SelectOne(String bie_ship_contno_shr, String bie_ship_blno_shr,
+			String prePayment, String bie_ship_hold) throws Exception {
 
-		return shipperDAO.Search_PrePaymentCont_Select(bie_ship_contno_shr, bie_ship_blno_shr, prePayment);
+		return shipperDAO.Search_PrePaymentCont_SelectOne(bie_ship_contno_shr, bie_ship_blno_shr, prePayment, bie_ship_hold);
 	}
 
 }
