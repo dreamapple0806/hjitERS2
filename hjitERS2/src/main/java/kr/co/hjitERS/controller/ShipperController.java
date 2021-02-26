@@ -91,14 +91,14 @@ public class ShipperController {
 				beanMain.setTake_user(vo.getCu_takeuser());
 				beanMain.setTake_usermail(vo.getCu_takeusermail());
 				beanMain.setInuser(vo.getCu_code()); 
-				beanMain.setIndate((String) request.getParameter("issue_date").replace("-", ""));
+				beanMain.setIndate((String) request.getParameter("issue_date").replaceAll("-", ""));
 				beanMain.setProc_type("0");
 				beanMain.setShip_customs("");
 				beanMain.setTax_snum("");
-				beanMain.setShip_tot(FormatUtil.nvl((String) request.getParameter("ship_tot"), "0").replace(",", ""));
-				beanMain.setShip_amt(FormatUtil.nvl((String) request.getParameter("ship_amt"), "0").replace(",", ""));
-				beanMain.setShip_vat(FormatUtil.nvl((String) request.getParameter("ship_vat"), "0").replace(",", ""));
-				beanMain.setShip_dep(FormatUtil.nvl((String) request.getParameter("ship_tot"), "0").replace(",", ""));
+				beanMain.setShip_tot(FormatUtil.nvl((String) request.getParameter("ship_tot"), "0").replaceAll(",", ""));
+				beanMain.setShip_amt(FormatUtil.nvl((String) request.getParameter("ship_amt"), "0").replaceAll(",", ""));
+				beanMain.setShip_vat(FormatUtil.nvl((String) request.getParameter("ship_vat"), "0").replaceAll(",", ""));
+				beanMain.setShip_dep(FormatUtil.nvl((String) request.getParameter("ship_tot"), "0").replaceAll(",", ""));
 				
 				String prePayment = (String) request.getParameter("prePaidY");		
 				String holdContData = (String)request.getParameter("holdContData");
@@ -111,15 +111,16 @@ public class ShipperController {
 				ArrayList<Object> holdContList = new ArrayList<Object>();
 				ArrayList<InAccountManageVO> virAcctList = new ArrayList<InAccountManageVO>();
 				
+				logger.info(vo.getCu_adcode() + "'s Selected HoldContainer Count : " + holdContDataArray.size());
+				
 				// 선택한 컨테이너 정보 조회
 				for(int i=0; i<holdContDataArray.size(); i++) {
 					JsonObject object = (JsonObject) holdContDataArray.get(i);
-					logger.info("prePayment : " + prePayment + " / bie_ship_contno : " + object.get("bie_ship_contno").getAsString() + " / bie_ship_blno : " + object.get("bie_ship_blno").getAsString());
 					ShipperVO shipVO = new ShipperVO();
 					if(prePayment.equals("Y")) {
-						shipVO = shipperService.Search_PrePaymentCont_SelectOne(object.get("bie_ship_contno").getAsString()
-								, object.get("bie_ship_blno").getAsString(), prePayment, object.get("bie_ship_hold").getAsString());
-						logger.info("ForeCast Container Info : " + shipVO.toString());		
+						shipVO = shipperService.Search_PrePaymentCont_SelectOne(FormatUtil.nvl(object.get("bie_ship_contno").getAsString(), " ").replaceAll(" ", "")
+								, FormatUtil.nvl(object.get("bie_ship_blno").getAsString(), " ").replaceAll(" ", ""), prePayment, object.get("bie_ship_hold").getAsString());
+						logger.info("ForeCast Container Info : " + shipVO.toString());
 						holdContList.add(shipVO);
 					}
 					else {

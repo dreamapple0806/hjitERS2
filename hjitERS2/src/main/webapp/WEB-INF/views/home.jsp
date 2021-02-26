@@ -229,8 +229,8 @@
         					<td style="vertical-align:middle;">
 								<input class="text-center" type="date" id="bie_ship_symd_shr" name="bie_ship_symd_shr" style="width:150px" value="<%=eymd %>" disabled>&nbsp;&nbsp;
 							</td>
-        					<td><input class="form-control mr-sm-2 text-center" style="font-size:9pt; height:30px" type="text" id="bie_ship_contno_shr" name="bie_ship_contno_shr" placeholder="컨테이너 번호" aria-label="ship_dep"></td>
-        					<td><input class="form-control mr-sm-2 text-center" style="font-size:9pt; height:30px" type="text" id="bie_ship_blno_shr" name="bie_ship_blno_shr" placeholder="B/L 번호" aria-label="ship_tot"></td>
+        					<td><input class="form-control mr-sm-2 text-center" style="font-size:9pt; height:30px" type="text" id="bie_ship_contno_shr" name="bie_ship_contno_shr" placeholder="컨테이너 번호"></td>
+        					<td><input class="form-control mr-sm-2 text-center" style="font-size:9pt; height:30px" type="text" id="bie_ship_blno_shr" name="bie_ship_blno_shr" placeholder="B/L 번호"></td>
         					<td>
         						<button type="button" class="btn-sm btn btn-primary" onclick="javascript:SearchContActionJson();">조회</button>
         						&nbsp;&nbsp;
@@ -823,9 +823,9 @@
       	//적용버튼 선택시 선택된 미처리홀딩리스트를 홀딩리스트 테이블에 복사
         function onApply(){	
       		var count = 0;
-      		var totalAmt = Number($('#ship_amt').val().replace(",",""));
-      		var totalVat = Number($('#ship_vat').val().replace(",",""));
-      		var total = Number($('#ship_tot').val().replace(",",""));
+      		var totalAmt = Number($('#ship_amt').val().replace(/,/gi,''));
+      		var totalVat = Number($('#ship_vat').val().replace(/,/gi,''));
+      		var total = Number($('#ship_tot').val().replace(/,/gi,''));
         	var afterTen = getAfterDay();
       		
 			for (var i = 1; i < $('#unProcHoldingListTable tbody tr').length; i++) {

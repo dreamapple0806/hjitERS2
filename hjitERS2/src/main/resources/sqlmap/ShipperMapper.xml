@@ -32,7 +32,7 @@
 		ORDER BY a.bie_ship_contno, a.bie_ship_seq 
 	</select>	
 	
-	
+	<!-- 사전납부 컨테이터 데이터 생성 -->
 	<select id="SearchPreContAction" parameterType="string" statementType="CALLABLE">
 		{ 
 			CALL PRO_BILL_SHIPPER_HOLD_SEARCH(<choose>
@@ -56,6 +56,7 @@
 		}
 	</select>
 	
+	<!-- 사전납부 컨테이너 데이터 조회(홀드해제시) -->
 	<select id="Search_PrePaymentCont_SelectOne" resultType="shipperVO" parameterType="String">
 		SELECT A.BIE_FCAST_CONTNO AS BIE_SHIP_CONTNO, A.BIE_FCAST_POINT AS BIE_SHIP_POINT, A.BIE_FCAST_HOLD AS BIE_SHIP_HOLD, A.BIE_FCAST_SEQ AS BIE_SHIP_SEQ 
  			, A.BIE_FCAST_BLNO AS BIE_SHIP_BLNO, '-' AS BIE_SHIP_REFNO, '-' AS BIE_SHIP_REFNO2, '-' AS BIE_SHIP_PERSONAL 
@@ -71,26 +72,33 @@
  		FROM BIE_FORECAST_INF A
 		WHERE 1=1
 			<choose>
-				<when test="bie_ship_contno_shr != '' and bie_ship_blno_shr == 'NULL' ">
+				<when test="bie_ship_blno_shr == '' and bie_ship_contno_shr != '' ">
 				AND A.BIE_FCAST_CONTNO = #{bie_ship_contno_shr}
 				AND A.BIE_FCAST_HOLD = #{bie_ship_hold}
 				ORDER BY A.BIE_FCAST_CONTNO, A.UPD_DT
 				</when>
 				
-				<when test="bie_ship_blno_shr != 'NULL' and bie_ship_contno_shr == 'NULL' ">
+				<when test="bie_ship_blno_shr != '' and bie_ship_contno_shr != '' ">
+				AND A.BIE_FCAST_CONTNO = #{bie_ship_contno_shr} AND A.BIE_FCAST_BLNO = #{bie_ship_blno_shr}
+				AND A.BIE_FCAST_HOLD = #{bie_ship_hold}
+				ORDER BY A.BIE_FCAST_CONTNO, A.UPD_DT
+				</when>
+				
+				<when test="bie_ship_blno_shr != '' and bie_ship_contno_shr == '' ">
 				AND A.BIE_FCAST_BLNO = #{bie_ship_blno_shr}
 				AND A.BIE_FCAST_HOLD = #{bie_ship_hold}
 				ORDER BY A.BIE_FCAST_CONTNO, A.UPD_DT
 				</when>
 				
-				<otherwise>
-				AND A.BIE_FCAST_CONTNO = #{bie_ship_contno_shr} AND A.BIE_FCAST_BLNO = #{bie_ship_blno_shr}
-				AND A.BIE_FCAST_HOLD = #{bie_ship_hold}
+				<when test="bie_ship_blno_shr == '' and bie_ship_contno_shr == '' ">
+				AND A.BIE_FCAST_BLNO = ''
+				AND A.BIE_FCAST_HOLD = ''
 				ORDER BY A.BIE_FCAST_CONTNO, A.UPD_DT
-				</otherwise>
+				</when>
 			</choose>
 	</select>
 	
+	<!-- 사전납부 컨테이너 데이터 조회(홀드조회시) -->
 	<select id="Search_PrePaymentCont_Select" resultType="shipperVO" parameterType="String">
 		SELECT A.BIE_FCAST_CONTNO AS BIE_SHIP_CONTNO, A.BIE_FCAST_POINT AS BIE_SHIP_POINT, A.BIE_FCAST_HOLD AS BIE_SHIP_HOLD, A.BIE_FCAST_SEQ AS BIE_SHIP_SEQ 
  			, A.BIE_FCAST_BLNO AS BIE_SHIP_BLNO, '-' AS BIE_SHIP_REFNO, '-' AS BIE_SHIP_REFNO2, '-' AS BIE_SHIP_PERSONAL 

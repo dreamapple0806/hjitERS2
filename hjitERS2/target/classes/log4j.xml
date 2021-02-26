@@ -22,7 +22,7 @@
 
 	<!-- Application Loggers -->
 	<logger name="kr.co.hjitERS">
-		<level value="error" />
+		<level value="debug" />
 	</logger>
 
 	<!-- 3rdparty Loggers -->

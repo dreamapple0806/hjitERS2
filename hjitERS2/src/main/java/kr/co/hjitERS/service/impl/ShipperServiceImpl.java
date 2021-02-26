@@ -1,9 +1,13 @@
 package kr.co.hjitERS.service.impl;
 
 import java.util.ArrayList;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import kr.co.hjitERS.controller.ShipperController;
 import kr.co.hjitERS.service.dao.ShipperDAO;
 import kr.co.hjitERS.vo.InAccountManageVO;
 import kr.co.hjitERS.vo.ShipperPreVO;
@@ -11,6 +15,7 @@ import kr.co.hjitERS.vo.ShipperVO;
 
 @Service("shipperService")
 public class ShipperServiceImpl implements ShipperDAO{
+    private static final Logger logger = LoggerFactory.getLogger(ShipperController.class);
 	
 	@Autowired
 	private ShipperDAO shipperDAO;
@@ -75,10 +80,10 @@ public class ShipperServiceImpl implements ShipperDAO{
 	}
 
 	@Override
-	public String save_tosYsearch(String contno, String point, String ship_limitdate) {
+	public String save_tosYsearch(String contno, String blno, String ship_limitdate) {
 		String strErrMessage = " ";
 		try {
-			shipperDAO.save_tosYsearch(contno, point, ship_limitdate);
+			shipperDAO.save_tosYsearch(contno, blno, ship_limitdate);
 		} catch (Exception e) {
 			e.printStackTrace();
 			strErrMessage = "0";
@@ -90,6 +95,7 @@ public class ShipperServiceImpl implements ShipperDAO{
 	public String save_tosYcreate(String contno, String point, String hold, String ship_limitdate, String vessel, String voyage) {
 		String strErrMessage = " ";
 		try {
+			logger.info("Hold Prerelease Create");
 			shipperDAO.save_tosYcreate(contno, point, hold, ship_limitdate, vessel, voyage);
 		} catch (Exception e) {
 			e.printStackTrace();
