@@ -82,7 +82,7 @@
 						</tr>
 						<tr>
 					</table>
-					<table width="700" border="0" cellspacing="0" cellpadding="0" style="table-layout: fixed; FONT-SIZE: 9pt; FONT-FAMILY: 굴림; Design_Time_Lock: TRue" ID="Table2">
+					<table width="700" border="0" cellspacing="0" cellpadding="0" style="table-layout: fixed; FONT-SIZE: 9pt; FONT-FAMILY: 굴림; Design_Time_Lock: TRue" ID="Table1">
 						<colgroup>
 							<col width="100">
 							<col width="300">
@@ -98,8 +98,8 @@
 							<td height="20" align="left" colspan="2">등록번호 : ${comInfo.co_sano}</td></td>
 						</tr>
 						<tr>
-							<td height="20" align="left" colspan="2">상&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;호 : ${vo.cu_sangho}</td>
-							<td height="20" align="left" colspan="2">상&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;호 : ${comInfo.co_saname}</td>
+							<td height="20" align="left" colspan="2">상&nbsp;&nbsp;&nbsp;&nbsp;호 : ${vo.cu_sangho}</td>
+							<td height="20" align="left" colspan="2">상&nbsp;&nbsp;&nbsp;&nbsp;호 : ${comInfo.co_saname}</td>
 						</tr>
 						<tr>
 							<td height="20" align="left" colspan="2">대&nbsp;표&nbsp;자 : ${vo.cu_master}</td>
@@ -110,8 +110,8 @@
 							<td height="20" align="left" colspan="2">소&nbsp;재&nbsp;지 : ${comInfo.co_juso}</td>
 						</tr>
 						<tr>
-							<td height="20" align="left">업태 : &nbsp;${vo.cu_uptae}</td>
-							<td height="20" align="left">종목 : &nbsp;${vo.cu_upjong}</td>
+							<td height="20" align="left"colspan="2">업&nbsp;&nbsp;&nbsp;&nbsp;태 : &nbsp;${vo.cu_uptae}</td>
+							<td height="20" align="left"colspan="2">종&nbsp;&nbsp;&nbsp;&nbsp;목 : &nbsp;${vo.cu_upjong}</td>
 						</tr>
 						<tr>
 							<td height="10"></td>

@@ -18,6 +18,15 @@
 <!-- 부트스트랩, 커스텀 css 파일 링크 설정 -->
 <link rel="stylesheet" href="resources/lib/css/bootstrap.min.css">
 <link rel="shortcut icon" href="resources/image/favicon.ico" type="image/x-icon">
+<style type="text/css">
+@font-face{
+	font-family: 'Noto_Sans_KR';
+	src:url(resources/lib/fonts/Noto_Sans_KR/NotoSansKR-Regular.otf);
+}
+body { 
+	font-family: 'Noto_Sans_KR', gothic; 
+}
+</style>
 </head>
 <body>
 	<%

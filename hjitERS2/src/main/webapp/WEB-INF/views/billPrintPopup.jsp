@@ -105,8 +105,8 @@
 							<td height="20" align="left" colspan="2">소&nbsp;재&nbsp;지 : <%=comInfo.get(0).getCo_juso() %></td>
 						</tr>
 						<tr>
-							<td height="20" align="left">업&nbsp;태 : <%=vo.getCu_uptae() %>&nbsp;</td>
-							<td height="20" align="left">종&nbsp;목 : <%=comInfo.get(0).getCo_uptae() %>&nbsp;</td>
+							<td height="20" align="left"colspan="2">업&nbsp;&nbsp;&nbsp;&nbsp;태 : &nbsp;<%=vo.getCu_uptae() %>&nbsp;</td>
+							<td height="20" align="left"colspan="2">종&nbsp;&nbsp;&nbsp;&nbsp;목 : &nbsp;<%=comInfo.get(0).getCo_uptae() %>&nbsp;</td>
 						</tr>
 						<tr>
 							<td height="10"></td>
