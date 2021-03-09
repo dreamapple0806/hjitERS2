@@ -29,10 +29,7 @@ public class HomeController {
 	@RequestMapping(value = "/") 
 	public String index(HttpServletRequest request, HttpServletResponse response, ModelAndView mav) throws Exception {
 		logger.info("HomeController");
-		String dayProcessCount = loginService.dayProcessCount();
-				
-		HttpSession session = request.getSession();
-		session.setAttribute("dayProcessCount", dayProcessCount);
+		HttpSession session = request.getSession();		
 		
     	if(session.getAttribute("userInfo") == null) {
             return "/index";

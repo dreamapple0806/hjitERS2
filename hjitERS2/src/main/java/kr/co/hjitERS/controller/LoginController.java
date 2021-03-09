@@ -1,7 +1,5 @@
 package kr.co.hjitERS.controller;
 
-import java.io.PrintWriter;
-
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -44,7 +42,7 @@ public class LoginController {
 		    String cu_password = (String) request.getParameter("userPassword");
 
 		    logger.info("userId : " + userId + " / cu_password : " + cu_password);
-		    lvo.setCu_adcode(userId);
+		    lvo.setCu_adcode(FormatUtil.nvl3(userId, ""));
 	         
 	        CustVO vo = loginService.loginCustInfo(lvo);
 	         

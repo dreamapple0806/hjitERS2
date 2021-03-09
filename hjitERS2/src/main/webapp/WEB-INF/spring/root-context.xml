@@ -7,7 +7,6 @@
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
 		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
 
-	<!-- 데이터베이스 연결 -->	
 	<!-- 개발DB 연결정보 -->
 	<bean id="dataSourceDEV" class="org.springframework.jdbc.datasource.SimpleDriverDataSource">
 	    <property name="driverClass" value="oracle.jdbc.driver.OracleDriver" />
@@ -23,7 +22,8 @@
 		<property name="username" value="hjit_mis" />
 		<property name="password" value="hanjin" />
 	</bean>
-	 
+		
+	<!-- 데이터베이스 연결 -->	 
 	<bean id="dataSource" class="net.sf.log4jdbc.Log4jdbcProxyDataSource"> 
 	    <constructor-arg ref="dataSourceOP" /> 
 	    <property name="logFormatter"> 

@@ -47,7 +47,8 @@ public class SerialServiceImpl implements SerialDAO{
 			status = transactionManager.getTransaction(def);	
     		
     		//	1. 계산서 번호 생성
-    		beanMain.setSerial(this.getNewSerialSequence());
+    		//beanMain.setSerial(this.getNewSerialSequence());
+    		beanMain.setSerial(this.getNewSerial(beanMain.getIssue_date()));
     		logger.info("getNewSerial : " + beanMain.getSerial());
     		
     		//	2. 헤더저장

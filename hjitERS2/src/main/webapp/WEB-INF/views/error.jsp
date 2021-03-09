@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=EUC-KR" %>
+<%@ page contentType="text/html;charset=UTF-8" %>
 
 <html>
 <head>
@@ -26,10 +26,10 @@ div#err p.logo{
 <body>
 
 <div id="err">
-    <p class="logo"><img src="resources/image/logoCi.png" alt="HJIT_MIS - ÇÑÁø ÀÎÃµÄÁÅ×ÀÌ³ÊÅÍ¹Ì³Î" /></p>
+    <p class="logo"><img src="resources/image/logoCi.png" alt="HJIT_MIS - í•œì§„ ì¸ì²œì»¨í…Œì´ë„ˆí„°ë¯¸ë„" /></p>
     <p class="">
     	<a href="http://ers2.hjit.co.kr">
-    		<img src="resources/image/error_img.gif" alt="ERROR Occured - ºÒÆíÀ» µå·Á ´ë´ÜÈ÷ ÁË¼ÛÇÕ´Ï´Ù. ½Ã½ºÅÛ »ç¿ë¿¡ ¹®Á¦°¡ ÀÖÀ¸½Å °æ¿ì ÇÑÁø ÀÎÃµÄÁÅ×ÀÌ³ÊÅÍ¹Ì³Î °ü¸®ÆÀÀ¸·Î ¹®ÀÇ ÁÖ½Ã±â ¹Ù¶ø´Ï´Ù. °¨»çÇÕ´Ï´Ù." />
+    		<img src="resources/image/error_img.gif" alt="ERROR Occured - ë¶ˆíŽ¸ì„ ë“œë ¤ ëŒ€ë‹¨ížˆ ì£„ì†¡í•©ë‹ˆë‹¤. ì‹œìŠ¤í…œ ì‚¬ìš©ì— ë¬¸ì œê°€ ìžˆìœ¼ì‹  ê²½ìš° í•œì§„ ì¸ì²œì»¨í…Œì´ë„ˆí„°ë¯¸ë„ ê´€ë¦¬íŒ€ìœ¼ë¡œ ë¬¸ì˜ ì£¼ì‹œê¸° ë°”ëžë‹ˆë‹¤. ê°ì‚¬í•©ë‹ˆë‹¤." />
     	</a>
     </p>
     

@@ -131,7 +131,6 @@
 			</choose>
 	</select>
 	
-	
 	<select id="holdPurchaseVirAccount" resultType="InAccountManageVO" parameterType="String">
 		SELECT 
 			a.vir_acctno, a.tran_dd, a.tran_hh, a.incom_amount, a.rndclrnm

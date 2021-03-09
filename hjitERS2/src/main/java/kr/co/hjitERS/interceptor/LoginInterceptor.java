@@ -34,7 +34,7 @@ public class LoginInterceptor extends HandlerInterceptorAdapter{
     	logger.info("+++++ LoginInterceptor Post Controller Start +++++" + request.getRequestURI() + " / " + handler); 
     	
     	HttpSession session = request.getSession();
-    	Object userInfo = modelAndView.getModelMap().get("userInfo");
+    	Object userInfo = session.getAttribute("userInfo");
     	
     	if(userInfo != null) {
     		logger.info("userInfo is not null");

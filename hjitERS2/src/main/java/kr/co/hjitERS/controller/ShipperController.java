@@ -89,7 +89,7 @@ public class ShipperController {
 				beanMain.setIssue_date((String) request.getParameter("issue_date").replace("-", ""));
 				beanMain.setCu_code(vo.getCu_code());
 				beanMain.setTake_user(vo.getCu_takeuser());
-				beanMain.setTake_usermail(vo.getCu_takeusermail());
+				beanMain.setTake_usermail((String) request.getParameter("take_usermail"));
 				beanMain.setInuser(vo.getCu_code()); 
 				beanMain.setIndate((String) request.getParameter("issue_date").replaceAll("-", ""));
 				beanMain.setProc_type("0");
@@ -111,7 +111,7 @@ public class ShipperController {
 				ArrayList<Object> holdContList = new ArrayList<Object>();
 				ArrayList<InAccountManageVO> virAcctList = new ArrayList<InAccountManageVO>();
 				
-				logger.info(vo.getCu_adcode() + "'s Selected HoldContainer Count : " + holdContDataArray.size());
+				logger.info(vo.getCu_adcode() + "'s Selected HoldContainer Count : " + holdContDataArray.size()  + " / prePayment : " + prePayment);
 				
 				// 선택한 컨테이너 정보 조회
 				for(int i=0; i<holdContDataArray.size(); i++) {
@@ -158,7 +158,7 @@ public class ShipperController {
 					strErrMessage = save_sub_function(request, response, holdContList, virAcctList, beanMain, vo, prePayment);
 					logger.info("Normal Paid Junpyo Data Process Result : " + strErrMessage);
 				}
-				
+
 				if ( !strErrMessage.equals("1") ) {
 					response.setContentType("text/html; charset=UTF-8");				 
 					PrintWriter out = response.getWriter();				 
@@ -246,7 +246,7 @@ public class ShipperController {
 			logger.info("*********** ERS 홀드해제 입력정보 *************");
 			logger.info("*********** 기준일 : " + beanSub.getShip_basedate());
 			logger.info("*********** 반출기한 : " + beanSub.getShip_limitdate());
-			logger.info("*********** 컨테이너번호 : " + beanSub.getShip_basedate());
+			logger.info("*********** 컨테이너번호 : " + beanSub.getShip_contno());
 			logger.info("*********** BL 번호 : " + beanSub.getShip_blno());
 			logger.info("*********** 홀드명 : " + beanSub.getShip_hold());
 			logger.info("*********** 총금액 : " + beanSub.getShip_total());
@@ -417,7 +417,7 @@ public class ShipperController {
 		    // 사전납부 컨테이너 데이터 생성
 		    shipperService.SearchPreContAction(bie_ship_contno_shr, bie_ship_blno_shr, demurrage);
 		    // 사전납부 컨테이너 데이터 조회
-		    ArrayList<ShipperVO> list = shipperService.Search_PrePaymentCont_Select(bie_ship_contno_shr, bie_ship_blno_shr);
+		    ArrayList<ShipperVO> list = shipperService.Search_PrePaymentCont_Select(FormatUtil.nvl(bie_ship_contno_shr, ""), FormatUtil.nvl(bie_ship_blno_shr, ""));
 	    	logger.info("list size : " + list.size());
 		    
 		    if(list.size() != 0) {

@@ -25,8 +25,7 @@
 	String tot = vom.getShip_tot();
 	String vat = vom.getShip_vat();
 	String amount = vom.getShip_amt();
-
-	
+	String issue_date = vom.getIssue_date();
 %>
 
 <!DOCTYPE html>
@@ -245,7 +244,8 @@
 						<td width="60" style="border-top:1px red solid; border-left:1px red solid; border-right:1px red solid;"><font color=red>비 고</font></td>
 					</tr>
 					<%
-					for(int i=0; i<vos.size(); i++){
+					if(vos.size() > 0){
+						for(int i=0; i<vos.size(); i++){
 						SerialSubVO temp = vos.get(i);
 					%>
 					<tr>
@@ -260,6 +260,7 @@
 						<td style="border-top:1px red solid; border-left:1px red solid; border-right:1px red solid;"></td>
 					</tr>
 					<%
+					}
 					}
 					%>
 					<tr>

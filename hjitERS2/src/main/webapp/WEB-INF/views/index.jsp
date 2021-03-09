@@ -12,24 +12,24 @@
 	<link rel="stylesheet" href="resources/lib/css/bootstrap.min.css">
 	<link rel="stylesheet" href="resources/lib/css/custom.css">
 	<link rel="shortcut icon" href="resources/image/favicon.ico" type="image/x-icon">
+	<script src="resources/lib/jsDelivr/sweetalert2.all.min.js"></script>
+	<script src="resources/lib/jsDelivr/promise.min.js"></script>
 </head>
 <!-- Jquery, popper, bootstrap 자바스크립트 추가 -->
 <script src="resources/lib/js/jquery-3.4.1.min.js"></script>
 <script src="resources/lib/js/popper.js"></script>
 <script src="resources/lib/js/bootstrap.min.js"></script>
 <script src="resources/lib/js/util.js"></script>
-<%
-	String adminIP = "172.16.46.234";
 
-	String userIP = "";
-	if (userIP == "") userIP = request.getRemoteAddr().toString();
-	 
-%>
 <style type="text/css">
 @font-face{
 	font-family: 'nexon2gothic';
 	src:url(resources/lib/fonts/NEXON Lv2 Gothic.eot);
 	src:url(resources/lib/fonts/NEXON Lv2 Gothic.woff);
+}
+@font-face{
+	font-family: 'Noto_Sans_KR';
+	src:url(resources/lib/fonts/Noto_Sans_KR/NotoSansKR-Regular.otf);
 }
 .form-control::placeholder {
   color: red;
@@ -46,6 +46,13 @@
  color: red;
   font-weight: bold;
 }
+body { 
+	font-family: 'Noto_Sans_KR', gothic; 
+}
+label { 
+	font-family: 'Noto_Sans_KR', gothic; 
+}
+
 </style>
 <body>
 	<nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -60,9 +67,10 @@
 			<li class="nav-item dropdown">
 				<a class="nav-link dropdown-toggle" id="dropdown" data-toggle="dropdown" style="font-style: normal; font-weight: bold; "><font color="red">사용안내</font></a>
 				<div class="dropdown-menu" aria-labelledby="dropdown" style="vertical-align:middle;">
-						<a class="dropdown-item" id="helpExplorer">익스플로러 설정 안내</a>
-						<a class="dropdown-item" href="http://www.hjit.co.kr/admin/FileManager/download.do?qcode=Qk9BUkQsMzI2LFk=">사용메뉴얼 링크</a>
-						<a class="dropdown-item" href="http://www.hjit.co.kr/homepage/kor/Popup/ers_help.html" rel="noopener noreferrer" target="_blank">업무연락처 정보</a>
+					<a class="dropdown-item" id="helpExplorer"><img src="resources/image/browser-2x.png">&nbsp;&nbsp;익스플로러 설정 안내</a>
+					<a class="dropdown-item" href="http://www.hjit.co.kr/admin/FileManager/download.do?qcode=Qk9BUkQsMzI2LFk="><img src="resources/image/file-2x.png">&nbsp;&nbsp;사용 메뉴얼</a>
+					<a class="dropdown-item" href="http://www.hjit.co.kr/homepage/kor/Popup/ers_help.html" rel="noopener noreferrer" target="_blank"><img src="resources/image/phone-2x.png">&nbsp;&nbsp;업무연락처 정보</a>
+					<a class="dropdown-item" href="https://www.google.com/intl/ko/chrome/" rel="noopener noreferrer" target="_blank"><img src="resources/image/data-transfer-download-2x.png">&nbsp;&nbsp;크롬 다운로드</a>
 				</div> 
 			</li>
 		</ul>
@@ -71,7 +79,7 @@
 			<form class="form-inline my-2 my-lg-0 text-right" name="applyCheckForm" method="post">
 				<strong>사업자번호 등록여부 확인&nbsp;&nbsp;</strong>
 				<input class="form-control mr-sm-2" type="search" placeholder="숫자만 입력하세요." aria-label="search" type="text" id="cu_adcode" name="cu_adcode" value="" onkeypress="inNumber();">
-				<button class="btn btn-outline-success my-2 my-sm-0" type="submit" onClick="applyCheck()">검색</button>
+				<button class="btn btn-outline-success my-2 my-sm-0" type="submit" onkeypress="inNumber();" onClick="applyCheck()">검색</button>
 			</form>
 		</div>
 	</nav>
@@ -79,17 +87,17 @@
 		<div style="position: absolute; top:51%; left:59.5%">
 			<form name="loginForm" action="loginProcess.do" method="post" style="width:230px;height:150px">
 				<label style="font-style: normal; font-size:15px; font-weight:bolder; color:#0064CD; margin-bottom:3px;">아이디</label>
-				<input type="text" name="userId" value="" class="form-control" style="width:230px; font-size:10px; " placeholder="ID : 계산서발행 사업자번호(공급받는자)">
+				<input type="text" name="userId" value="" class="form-control" style="width:100%; font-size:10px;" onkeypress="inNumber();" placeholder="ID : 계산서발행 사업자번호(공급받는자)">
 				<label style="font-style: normal; font-size:15px; font-weight:bolder; color:#0064CD; margin-bottom:3px;">비밀번호</label>
-				<input type="text" name="userPassword" value="" class="form-control" style="width:230px; font-size:10px" placeholder="PW : 계산서발행 사업자번호(공급받는자)">
+				<input type="text" name="userPassword" value="" class="form-control" style="width:100%; font-size:10px" onkeypress="inNumber();" placeholder="PW : 계산서발행 사업자번호(공급받는자)">
 				<input type="checkbox" name="idsave" value="saveOk">
 				<label style="font-style: normal; font-size:15px; font-weight:bolder; color:#0064CD; margin-bottom:3px;">아이디 저장</label>
-				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button class="btn btn-sm btn-primary" type="submit" style="margin-top:5px;" onClick="login();">로그인</button>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button class="btn btn-sm btn-primary" type="button" style="margin-top:5px;" onClick="login();">로그인</button>
 			</form>			
 		</div>
-		<div style="position: absolute; top:75%; left:30%">
+		<!-- <div style="position: absolute; top:75%; left:30%">
 			<font size="5px"><strong>익스플로러에서는 호환성 보기 설정에서 [hjit.co.kr]을 제거하세요</strong></font>
-		</div>
+		</div> -->
 	</div>
 	
 	<!-- 모달 영역 -->
@@ -115,14 +123,6 @@
 			</div>
 		</div>
 	</div>
-	<%
-	// 내가 접속했을때만 처리건수가 조회됨
-	if(userIP.equals(adminIP)){
-	%>
-	<input type="text" name="dayProcessCount" value="${dayProcessCount}">
-	<%
-	}
-	%>
 	<script>
 		window.onload = function() {
 			if (getCookie("id")) { 
@@ -130,6 +130,14 @@
             	document.loginForm.idsave.checked = true;
         	}
 		}
+		
+		// Input 박스에 숫자만 입력 체크
+		function inNumber(){
+	        if(event.keyCode<48 || event.keyCode>57){
+				event.returnValue=false;
+				Swal.fire("숫자만 입력가능합니다.");
+	        }
+	    }
 		
 		// 모달 버튼에 이벤트를 건다.
 		$('#helpExplorer').on('click', function(){
@@ -184,21 +192,21 @@
 	            setCookie("id", document.loginForm.userId.value, 0); 
 	        }
 			
-			// 아이디 / 비밀번호 입력여부 체크
 			if (document.loginForm.userId.value =="") {
 		        alert("아이디를 입력하세요");
  				return false;
-				
 		    } 
-			if (document.loginForm.userPassword.value =="") {
+			else if (document.loginForm.userPassword.value =="") {
 		        alert("비밀번호를 입력하세요");
  				return false;				
 		    } 
-			if (document.loginForm.userId.value =="" && document.loginForm.userPassword.value =="") {
+			else if (document.loginForm.userId.value =="" && document.loginForm.userPassword.value =="") {
 		        alert("비밀번호를 입력하세요");
  				return false;				
 		    } 
-			document.loginForm.submit();
+			else{
+				document.loginForm.submit();	
+			}
 		}
 	</script>
 </body>

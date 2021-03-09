@@ -27,9 +27,21 @@
 <script src="resources/lib/jsDelivr/promise.min.js"></script>
 
 <style>
+	@font-face{
+		font-family: 'Noto_Sans_KR';
+	src:url(resources/lib/fonts/Noto_Sans_KR/NotoSansKR-Regular.otf);
+	}
+	
 	.swal2-title{
 		font-size: 20px;
 	}
+	
+	body { 
+		font-family: 'Noto_Sans_KR', gothic; 
+	}
+	label { 
+		font-family: 'Noto_Sans_KR', gothic; 
+	}	
 </style>
 
 </head>
@@ -60,9 +72,10 @@
 				<li class="nav-item dropdown">
 					<a class="nav-link dropdown-toggle" id="dropdown" data-toggle="dropdown" style="font-style: normal; font-weight: bold; "><font size="3">사용안내</font></a>
 					<div class="dropdown-menu" aria-labelledby="dropdown" style="vertical-align:middle;">
-						<a class="dropdown-item" id="helpExplorer"><img src="resources/image/browser-2x.png">&nbsp;익스플로러 설정 안내</a>
-						<a class="dropdown-item" href="http://www.hjit.co.kr/admin/FileManager/download.do?qcode=Qk9BUkQsMzI2LFk="><img src="resources/image/file-2x.png">&nbsp;사용메뉴얼 링크</a>
-						<a class="dropdown-item" href="http://www.hjit.co.kr/homepage/kor/Popup/ers_help.html" rel="noopener noreferrer" target="_blank"><img src="resources/image/phone-2x.png">&nbsp;업무연락처 정보</a>
+						<a class="dropdown-item" id="helpExplorer"><img src="resources/image/browser-2x.png">&nbsp;&nbsp;익스플로러 설정 안내</a>
+						<a class="dropdown-item" href="http://www.hjit.co.kr/admin/FileManager/download.do?qcode=Qk9BUkQsMzI2LFk="><img src="resources/image/file-2x.png">&nbsp;&nbsp;사용 메뉴얼</a>
+						<a class="dropdown-item" href="http://www.hjit.co.kr/homepage/kor/Popup/ers_help.html" rel="noopener noreferrer" target="_blank"><img src="resources/image/phone-2x.png">&nbsp;&nbsp;업무연락처 정보</a>
+						<a class="dropdown-item" href="https://www.google.com/intl/ko/chrome/" rel="noopener noreferrer" target="_blank"><img src="resources/image/data-transfer-download-2x.png">&nbsp;&nbsp;크롬 다운로드</a>
 					</div> 
 				</li>
 			</ul>
@@ -101,12 +114,16 @@
 		<input type="hidden" id="virAcctData" name="virAcctData" value="" />
 		<input type="hidden" id="demurrage" name="demurrage" value="" />
 		<input type="hidden" id="sessionUserInfo" name="sessionUserInfo" value="<%=session.getAttribute("userInfo") %>" />
-			
+		
+	<!-- <div style="text-align: center; margin-top: 15px;">	
+		<font size="5px">정산서비스를 처음 이용하시는 경우, 우측상단의 <font color="red"><strong>[사용안내]</strong></font>에서 사용 메뉴얼을 확인하시기 바랍니다.</font>
+	</div> -->
 	<div class="card bg-light mt-4 container">		
 		<div class="card-header bg-light show-grid">
 			
 			<h5 class="card-title" style="vertical-align: middle;">
-				<span class='font-weight-bold'>고객정보</span>
+				<span class='font-weight-bold'>고객정보</span>&nbsp;
+				<span class='font-weight-light text-danger'><font size="3">※ 고객정보 수정은 <font class="text-info">[사용안내 -> 업무연락처 정보]</font>를 통해 연락해주시기 바랍니다.</font></span>
 			</h5>	
 			
 			<table class="table table-bordered table-condensed" style="font-size:9pt;">
@@ -313,7 +330,7 @@
 						<td style="border-top: 0px;">
 							<h5 class="card-title">
 								<span class='font-weight-bold'>2. Holding List</span>&nbsp;
-								<span class='text-danger font-weight-light'><font size="3">※ 미처리 Holding List에서 적용한 컨테이너만 거래명세서 출력이 가능합니다.</font></span>
+								<span class='text-danger font-weight-light'><font size="3">※ 미처리 Holding List에서 검색 후, 적용 처리된 컨테이너만 거래명세서 출력이 가능합니다.</font></span>
 							</h5>	
 						</td>
 						<td class="text-right" style="border-top: 0px">
@@ -479,8 +496,8 @@
 		$().ready(function () { 
 			Swal.fire({ 
 				icon: 'success', // Alert 타입 
-				title: '익스플로러에서는 호환성 보기 메뉴에서\n[hjit.co.kr] 항목을 제거해주기 바랍니다.', // Alert 제목 
-				text: '사용 문의 : 032 - 202 - 4922' // Alert 내용 
+				title: '익스플로러에서는 호환성 보기 메뉴에서\n[hjit.co.kr] 항목을 제거하세요.', // Alert 제목 
+				// text: '사용 문의 : 032 - 202 - 4922' // Alert 내용 
 			}); 
 		});
 		
@@ -711,94 +728,11 @@
  		//사전납부 YN 변경시 미처리홀딩리스트 테이블 초기화
         function onprePaymentYN(useCk){				
 			if(useCk < 1){
-           		document.getElementById('bie_ship_symd_shr').disabled=false;            		
-                $('#unProcHoldingListTable > tbody').empty();
-                
-                for(var a=0; a<11; a++){
-                	$('#unProcHoldingListTable > tbody:last').append('<tr class="text-center text-truncate">' + 
-    						'<td style="width:45px; height:35px;"></td>' +
-    						'<td style="width:45px; height:35px;"></td>' +
-    						'<td style="width:95px; height:35px;"></td>' +
-    						'<td style="width:115px; height:35px;"></td>' +
-    						'<td style="width:75px; height:35px;"></td>' +
-    				        							
-    						'<td style="width:95px; height:35px;"></td>' +
-    						'<td style="width:65px; height:35px;"></td>' +
-    						'<td style="width:75px; height:35px;"></td>' +
-    						'<td style="width:65px; height:35px;"></td>' +
-    						'<td style="width:55px; height:35px;"></td>' +
-    				        							
-        					'<td style="width:135px; height:35px;"></td>' +
-        					'<td style="width:65px; height:35px;"></td>' +
-    						'<td style="width:75px; height:35px;"></td>' +
-    						'<td style="width:75px; height:35px;"></td>' +
-      					'</tr>');	
-               }                            		
-                $('#holdingListTable > tbody').empty(); 
-                
-                for(var a=0; a<11; a++){
-                	$('#holdingListTable > tbody:last').append(
-                			'<tr class="text-center text-truncate" style="height:35px;">' + 
-            				'<td style="width:40px; height:35px;"></td>' + 
-            				'<td style="width:100px; height:35px;"></td>' + 
-            				'<td style="width:100px; height:35px;"></td>' + 
-            				'<td style="width:100px; height:35px;"></td>' + 
-            				'<td style="width:120px; height:35px;"></td>' +     					        					
-            				'<td style="width:120px; height:35px;"></td>' + 
-            				
-            				'<td style="width:80px; height:35px;"></td>' + 
-            				'<td style="width:80px; height:35px;"></td>' + 
-            				'<td style="width:80px; height:35px;"></td>' + 
-            				'<td style="width:90px; height:35px;"></td>' +     					        					
-            				'<td style="width:90px; height:35px;"></td>' + 
-            				'<td style="width:90px; height:35px;"></td>' + 
-          				'</tr>');	
-               }                    
+				document.getElementById('bie_ship_symd_shr').disabled=false;            		
+				resetTable();
 			} else if(useCk > 1){
-				document.getElementById('bie_ship_symd_shr').disabled=true;
-                $('#unProcHoldingListTable > tbody').empty();        		
-                $('#holdingListTable > tbody').empty();
-                
-                for(var a=0; a<11; a++){
-                	$('#unProcHoldingListTable > tbody:last').append('<tr class="text-center text-truncate">' + 
-                			'<td style="width:45px; height:35px;"></td>' +
-    						'<td style="width:45px; height:35px;"></td>' +
-    						'<td style="width:95px; height:35px;"></td>' +
-    						'<td style="width:115px; height:35px;"></td>' +
-    						'<td style="width:75px; height:35px;"></td>' +
-    				        							
-    						'<td style="width:95px; height:35px;"></td>' +
-    						'<td style="width:65px; height:35px;"></td>' +
-    						'<td style="width:75px; height:35px;"></td>' +
-    						'<td style="width:65px; height:35px;"></td>' +
-    						'<td style="width:55px; height:35px;"></td>' +
-    				        							
-        					'<td style="width:135px; height:35px;"></td>' +
-        					'<td style="width:65px; height:35px;"></td>' +
-    						'<td style="width:75px; height:35px;"></td>' +
-    						'<td style="width:75px; height:35px;"></td>' +
-      					'</tr>');	
-               }
-         		
-                $('#holdingListTable > tbody').empty();
-                for(var a=0; a<11; a++){
-                	$('#holdingListTable > tbody:last').append(
-                			'<tr class="text-center text-truncate" style="height:35px;">' + 
-            				'<td style="width:40px; height:35px;"></td>' + 
-            				'<td style="width:100px; height:35px;"></td>' + 
-            				'<td style="width:100px; height:35px;"></td>' + 
-            				'<td style="width:100px; height:35px;"></td>' + 
-            				'<td style="width:120px; height:35px;"></td>' +     					        					
-            				'<td style="width:120px; height:35px;"></td>' + 
-            				
-            				'<td style="width:80px; height:35px;"></td>' + 
-            				'<td style="width:80px; height:35px;"></td>' + 
-            				'<td style="width:80px; height:35px;"></td>' + 
-            				'<td style="width:90px; height:35px;"></td>' +     					        					
-            				'<td style="width:90px; height:35px;"></td>' + 
-            				'<td style="width:90px; height:35px;"></td>' + 
-          				'</tr>');	
-               }               
+				document.getElementById('bie_ship_symd_shr').disabled=true;          		
+				resetTable();
 			} 
 	    }
 
@@ -1127,18 +1061,12 @@
 					return false;
 				}
 				if(regex.test($('#take_usermail').val()) == false){
-	                //alert("거래처 E-MAIL을 입력해 주세요.");
 	 				Swal.fire("거래처 E-MAIL을 입력해 주세요.");
 					return false;
 				}
-				
-				if($("#holdingListTable input[type='checkbox']").is(":checked") == false) {
-					Swal.fire("홀드해제할 컨테이너를 선택하지 않았습니다.\n[Holding List] 항목을 확인하세요.");
-					return false;						
-				}
 
 	        	for(var i=0; i<$('#holdingListTable tbody tr').length; i++){
-	        		if($('#holdingListTable tbody tr').eq(i).children().find('input[type="checkbox"]').is(':checked')){
+	        		if($('#holdingListTable tbody tr').eq(i).attr('bie_ship_contno') != null){
 	        			var holdContObject = new Object();
 						holdContObject.bie_ship_contno = $('#holdingListTable tbody tr').eq(i).attr('bie_ship_contno');
 						holdContObject.bie_ship_point = $('#holdingListTable tbody tr').eq(i).attr('bie_ship_point');
@@ -1147,7 +1075,7 @@
 						holdContObject.bie_ship_blno = $('#holdingListTable tbody tr').eq(i).attr('bie_ship_blno');
 						holdContObject.prePayment = $('#holdingListTable tbody tr').eq(i).attr('prePayment');
 						holdContArray.push(holdContObject);
-	    			}
+	        		}
 	        	}
 	        			
 	        	for(var i=0; i<$('#virAcctListTable tbody tr').length; i++){
@@ -1162,19 +1090,24 @@
 					}
 	        	}
 
-	        	var jsonHoldContData = JSON.stringify(holdContArray);
-	        	var jsonVirAcctData = JSON.stringify(virAcctArray);
-	        	var demurrage = $('#bie_ship_symd_shr').val();
-	        	
-	        	$('#holdContData').val(jsonHoldContData);
-	        	$('#virAcctData').val(jsonVirAcctData);
-	        	$('#demurrage').val(demurrage);
-	        	
-	        	var f = document.forms[0];
-	        	f.action = "contHoldRelease.do";
-	        	f.target = "";
-	        	f.submit();
-				
+	        	if(holdContArray.length == 0 || virAcctArray.length == 0){
+					Swal.fire("입금내역과 Holding List에 선택된 정보 없음.");
+					return false;
+				}
+	        	else{
+		        	var jsonHoldContData = JSON.stringify(holdContArray);
+		        	var jsonVirAcctData = JSON.stringify(virAcctArray);
+		        	var demurrage = $('#bie_ship_symd_shr').val();
+		        	
+		        	$('#holdContData').val(jsonHoldContData);
+		        	$('#virAcctData').val(jsonVirAcctData);
+		        	$('#demurrage').val(demurrage);
+		        	
+		        	var f = document.forms[0];
+		        	f.action = "contHoldRelease.do";
+		        	f.target = "";
+		        	f.submit();
+	        	}
 			}
 			
 			if(option == "printBill"){
@@ -1220,9 +1153,76 @@
 			}
 		}
 		
+		function resetTable(){
+			$('#unProcHoldingListTable > tbody').empty();
+            
+			for(var a=0; a<11; a++){
+				$('#unProcHoldingListTable > tbody:last').append('<tr class="text-center text-truncate">' + 
+					'<td style="width:45px; height:35px;"></td>' +
+					'<td style="width:45px; height:35px;"></td>' +
+					'<td style="width:95px; height:35px;"></td>' +
+					'<td style="width:115px; height:35px;"></td>' +
+					'<td style="width:75px; height:35px;"></td>' +
+				        							
+					'<td style="width:95px; height:35px;"></td>' +
+					'<td style="width:65px; height:35px;"></td>' +
+					'<td style="width:75px; height:35px;"></td>' +
+					'<td style="width:65px; height:35px;"></td>' +
+					'<td style="width:55px; height:35px;"></td>' +
+				        							
+					'<td style="width:135px; height:35px;"></td>' +
+					'<td style="width:65px; height:35px;"></td>' +
+					'<td style="width:75px; height:35px;"></td>' +
+					'<td style="width:75px; height:35px;"></td>' +
+					'</tr>');	
+           }                            		
+			$('#holdingListTable > tbody').empty(); 
+            
+            for(var a=0; a<11; a++){
+            	$('#holdingListTable > tbody:last').append(
+            			'<tr class="text-center text-truncate" style="height:35px;">' + 
+        				'<td style="width:40px; height:35px;"></td>' + 
+        				'<td style="width:100px; height:35px;"></td>' + 
+        				'<td style="width:100px; height:35px;"></td>' + 
+        				'<td style="width:100px; height:35px;"></td>' + 
+        				'<td style="width:120px; height:35px;"></td>' +     					        					
+        				'<td style="width:120px; height:35px;"></td>' + 
+        				
+        				'<td style="width:80px; height:35px;"></td>' + 
+        				'<td style="width:80px; height:35px;"></td>' + 
+        				'<td style="width:80px; height:35px;"></td>' + 
+        				'<td style="width:90px; height:35px;"></td>' +     					        					
+        				'<td style="width:90px; height:35px;"></td>' + 
+        				'<td style="width:90px; height:35px;"></td>' + 
+      				'</tr>');	
+           }   
+            
+            $('#virAcctListTable > tbody').empty();
+            for(var a=0; a<10; a++){
+            	$('#virAcctListTable > tbody:last').append(
+            			'<tr class="text-center text-truncate" style="height:35px;">' +
+        				'<td style="width:60px; height:35px;"></td>' +
+        				'<td style="width:60px; height:35px;"></td>' +
+        				'<td style="width:160px; height:35px;"></td>' +
+        				'<td style="width:160px; height:35px;"></td>' +
+        				'<td style="width:160px; height:35px;"></td>' +        					        					
+        				'<td style="width:160px; height:35px;"></td>' +        					
+        				'<td style="width:160px; height:35px;"></td>' +
+        				'<td style="width:160px; height:35px;"></td>' +
+      				'</tr>');	
+           }      
+
+			$('#ship_amt').val(numberFormat(0)); 
+			$('#ship_vat').val(numberFormat(0));
+			$('#ship_dep').val(numberFormat(0)); 
+			$('#ship_tot').val(numberFormat(0)); 
+            
+		}
+		
 		function logout() {
 			document.Form.action="logoutProcess.do";
 			document.Form.submit();
 		} 		
+		
 	</script>
 </html>
