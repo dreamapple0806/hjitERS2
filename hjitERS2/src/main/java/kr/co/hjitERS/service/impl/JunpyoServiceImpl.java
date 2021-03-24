@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import kr.co.hjitERS.controller.ShipperController;
@@ -47,6 +48,7 @@ public class JunpyoServiceImpl implements JunpyoDAO{
 	DefaultTransactionDefinition def = null;
 	TransactionStatus status = null;
 
+	@Transactional
 	@Override
 	public String save(HttpServletRequest request, SerialMainVO beanMain, List<SerialSubVO> lstDataSub, List<VirAcctVO> lstDatainaccount, String prePayment) throws Exception {
 		String strErrMessage = "";
@@ -121,10 +123,12 @@ public class JunpyoServiceImpl implements JunpyoDAO{
 	public void transactionManager(String strErrMessage, TransactionStatus status) {
 		if (strErrMessage.equals("1")) {
         	logger.info("transactionManager.commited : " + strErrMessage);
-			transactionManager.commit(status);
+			transactionManager.commit(status);	
+    		status.flush();
         } else{
         	logger.info("transactionManager.rollback : " + strErrMessage);
-			transactionManager.rollback(status);
+			transactionManager.rollback(status);	
+    		status.flush();
         }
 	}
 	

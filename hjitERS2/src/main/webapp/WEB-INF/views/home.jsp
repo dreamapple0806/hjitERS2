@@ -70,11 +70,12 @@
 		<div class="float-right">
 			<ul class="navbar-nav mr-auto">
 				<li class="nav-item dropdown">
-					<a class="nav-link dropdown-toggle" id="dropdown" data-toggle="dropdown" style="font-style: normal; font-weight: bold; "><font size="3">사용안내</font></a>
+					<a class="nav-link dropdown-toggle" id="dropdown" data-toggle="dropdown" style="font-style: normal; font-weight: bold; "><font size="3">업무연락처 및 사용안내</font></a>
 					<div class="dropdown-menu" aria-labelledby="dropdown" style="vertical-align:middle;">
-						<a class="dropdown-item" id="helpExplorer"><img src="resources/image/browser-2x.png">&nbsp;&nbsp;익스플로러 설정 안내</a>
-						<a class="dropdown-item" href="http://www.hjit.co.kr/admin/FileManager/download.do?qcode=Qk9BUkQsMzI2LFk="><img src="resources/image/file-2x.png">&nbsp;&nbsp;사용 메뉴얼</a>
+						<a class="dropdown-item" href="http://www.hjit.co.kr" target="_blank"><img src="resources/image/home-2x.png">&nbsp;&nbsp;HJIT 홈페이지</a>
 						<a class="dropdown-item" href="http://www.hjit.co.kr/homepage/kor/Popup/ers_help.html" rel="noopener noreferrer" target="_blank"><img src="resources/image/phone-2x.png">&nbsp;&nbsp;업무연락처 정보</a>
+						<a class="dropdown-item" href="http://www.hjit.co.kr/admin/FileManager/download.do?qcode=Qk9BUkQsMzI2LFk="><img src="resources/image/file-2x.png">&nbsp;&nbsp;사용 메뉴얼</a>
+						<a class="dropdown-item" id="helpExplorer"><img src="resources/image/browser-2x.png">&nbsp;&nbsp;익스플로러 설정 안내</a>
 						<a class="dropdown-item" href="https://www.google.com/intl/ko/chrome/" rel="noopener noreferrer" target="_blank"><img src="resources/image/data-transfer-download-2x.png">&nbsp;&nbsp;크롬 다운로드</a>
 					</div> 
 				</li>
@@ -223,7 +224,7 @@
 		<div class="card-header bg-light show-grid">
 			<h5 class="card-title">
 				<span class='font-weight-bold'>1. 미처리 Holding List 검색 (사전납부 사용시 Y 선택)</span>&nbsp;
-				<span class='text-danger font-weight-light'><font size="3">※ 당일납부비용과 사전납부비용은 분리하여 처리하십시요.</font></span>
+				<span class='text-danger font-weight-light'><font size="3">※ 당일납부비용과 사전납부비용은 분리하여 처리하십시요. <a href="http://www.hjit.co.kr/homepage/kor/Popup/ers_help.html" target="_blank">[비용문의연락처]</a></font></span>
 			</h5>
 			<div>			
 				<table class="table table-bordered" style="width:100%; font-size:9pt;">
@@ -497,6 +498,7 @@
 			Swal.fire({ 
 				icon: 'success', // Alert 타입 
 				title: '익스플로러에서는 호환성 보기 메뉴에서\n[hjit.co.kr] 항목을 제거하세요.', // Alert 제목 
+				text: '사이트의 모든 기능은 크롬 브라우저를 권장합니다.'
 				// text: '사용 문의 : 032 - 202 - 4922' // Alert 내용 
 			}); 
 		});
@@ -845,6 +847,7 @@
 					$('#unProcHoldingListTable tr').eq(i).attr('chk', '1');
 				}
 			}
+			Swal.fire(count + "개의 컨테이너를 적용하였습니다.");
 	    }
 
       	//전체선택 체크박스 클릭		
@@ -962,7 +965,7 @@
 		function SearchVirAccountJson(){			
 			$.ajax({
 		        type:'POST',
-		        url : "<c:url value='/SearchVirAccountJson.do'/>",
+		        url : "/SearchVirAccountJson.do",
 		        data:$("#Form").serialize(),
 		        contentType: "application/x-www-form-urlencoded; charset=UTF-8",
 		        success : function(data){
@@ -1015,7 +1018,7 @@
 		            	$("#virAcctListTable > tbody").html(html);
 		            }
 		            else{
-			        	Swal.fire('조회 결과가 없습니다.');
+			        	Swal.fire('조회 결과가 없습니다. : ' + data.length);
 		            }
 		        },
 		        error:function(request,status,error){

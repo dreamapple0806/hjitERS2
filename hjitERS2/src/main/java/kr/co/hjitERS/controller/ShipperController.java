@@ -493,7 +493,7 @@ public class ShipperController {
 	@ResponseBody
 	public ResponseEntity<String> SearchVirAccount(HttpServletRequest request, HttpServletResponse response, ModelAndView mav) throws Exception {
 
-		logger.info("SearchVirAccount_Json");
+		logger.info("SearchVirAccount_Json : " + request.getRequestedSessionId());
 	    
 	    String cu_code = (String) request.getParameter("cu_code");
 	    HttpHeaders responseHeaders = new HttpHeaders();

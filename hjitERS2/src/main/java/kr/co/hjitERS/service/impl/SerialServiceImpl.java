@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import kr.co.hjitERS.controller.ShipperController;
@@ -34,7 +35,8 @@ public class SerialServiceImpl implements SerialDAO{
 
 	DefaultTransactionDefinition def = null;
 	TransactionStatus status = null;
-
+	
+	@Transactional
 	@Override
 	public String save(SerialMainVO beanMain, List<SerialSubVO> lstDataSub, List<VirAcctVO> lstDatainaccount) {
 		String strErrMessage = "";
@@ -147,10 +149,17 @@ public class SerialServiceImpl implements SerialDAO{
 	public void transactionManager(String strErrMessage, TransactionStatus status) {
 		if (strErrMessage.equals("1")) {
         	logger.info("transactionManager.commited : " + strErrMessage);
-			transactionManager.commit(status);
+    		logger.info("transactionManager.isCompleted : " + status.isCompleted());
+			transactionManager.commit(status);	
+    		status.flush();
+    		logger.info("transactionManager.isCompleted : " + status.isCompleted());
+    		
         } else{
         	logger.info("transactionManager.rollback : " + strErrMessage);
-			transactionManager.rollback(status);
+    		logger.info("transactionManager.isCompleted : " + status.isCompleted());
+			transactionManager.rollback(status);	
+    		status.flush();
+    		logger.info("transactionManager.isCompleted : " + status.isCompleted());
         }
 	}
 	

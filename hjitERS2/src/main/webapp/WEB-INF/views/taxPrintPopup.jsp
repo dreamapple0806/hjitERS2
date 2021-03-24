@@ -291,7 +291,7 @@
 									<tr>
 										<td align="center" style="border-left: 1px black solid; border-right: 1px black solid; border-bottom: 1px black solid;">터미널 부대</td>
 										<td align="center" height="55" style="border-right: 1px black solid; border-bottom: 1px black solid;">보관료, 냉동료, 상하차, 반송화물</td>
-										<td align="center" height="55" style="border-right: 1px black solid; border-bottom: 1px black solid;">TEL : 032-202-4937<br />FAX : 032-821-9071
+										<td align="center" height="55" style="border-right: 1px black solid; border-bottom: 1px black solid;">TEL : 032-202-4936~7<br />FAX : 032-821-9071
 										</td>
 									</tr>
 									<tr>

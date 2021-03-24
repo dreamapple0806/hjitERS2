@@ -15,8 +15,7 @@ public class LoginInterceptor extends HandlerInterceptorAdapter{
     
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-    	logger.info("+++++ LoginInterceptor Pre Controller Start +++++ : " + request.getRequestURI() + " / " + handler);    	
-    	
+    	logger.info("+++++ LoginInterceptor Pre Controller Start +++++");   
     	HttpSession session = request.getSession();
     	
     	if(session.getAttribute("userInfo") != null)  {
@@ -31,13 +30,13 @@ public class LoginInterceptor extends HandlerInterceptorAdapter{
 
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
-    	logger.info("+++++ LoginInterceptor Post Controller Start +++++" + request.getRequestURI() + " / " + handler); 
+    	logger.info("+++++ LoginInterceptor Post Controller Start +++++" + request.getRequestURI() + " / " + request.getRequestedSessionId()); 
     	
     	HttpSession session = request.getSession();
     	Object userInfo = session.getAttribute("userInfo");
     	
     	if(userInfo != null) {
-    		logger.info("userInfo is not null");
+    		logger.info("userInfo is not null"); 
     		session.setAttribute("userInfo", userInfo);
     	}
     	else {

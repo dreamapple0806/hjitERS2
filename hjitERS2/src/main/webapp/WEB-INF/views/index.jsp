@@ -65,11 +65,12 @@ label {
 		</button>
 		<ul class="navbar-nav mr-auto">
 			<li class="nav-item dropdown">
-				<a class="nav-link dropdown-toggle" id="dropdown" data-toggle="dropdown" style="font-style: normal; font-weight: bold; "><font color="red">사용안내</font></a>
+				<a class="nav-link dropdown-toggle" id="dropdown" data-toggle="dropdown" style="font-style: normal; font-weight: bold; "><font color="red">업무연락처 및 사용안내</font></a>
 				<div class="dropdown-menu" aria-labelledby="dropdown" style="vertical-align:middle;">
-					<a class="dropdown-item" id="helpExplorer"><img src="resources/image/browser-2x.png">&nbsp;&nbsp;익스플로러 설정 안내</a>
-					<a class="dropdown-item" href="http://www.hjit.co.kr/admin/FileManager/download.do?qcode=Qk9BUkQsMzI2LFk="><img src="resources/image/file-2x.png">&nbsp;&nbsp;사용 메뉴얼</a>
+					<a class="dropdown-item" href="http://www.hjit.co.kr" target="_blank"><img src="resources/image/home-2x.png">&nbsp;&nbsp;HJIT 홈페이지</a>
 					<a class="dropdown-item" href="http://www.hjit.co.kr/homepage/kor/Popup/ers_help.html" rel="noopener noreferrer" target="_blank"><img src="resources/image/phone-2x.png">&nbsp;&nbsp;업무연락처 정보</a>
+					<a class="dropdown-item" href="http://www.hjit.co.kr/admin/FileManager/download.do?qcode=Qk9BUkQsMzI2LFk="><img src="resources/image/file-2x.png">&nbsp;&nbsp;사용 메뉴얼</a>
+					<a class="dropdown-item" id="helpExplorer"><img src="resources/image/browser-2x.png">&nbsp;&nbsp;익스플로러 설정 안내</a>
 					<a class="dropdown-item" href="https://www.google.com/intl/ko/chrome/" rel="noopener noreferrer" target="_blank"><img src="resources/image/data-transfer-download-2x.png">&nbsp;&nbsp;크롬 다운로드</a>
 				</div> 
 			</li>
@@ -77,28 +78,43 @@ label {
 		<div class="collapse navbar-collapse "></div>
 		<div id="navbar" class="float-right">
 			<form class="form-inline my-2 my-lg-0 text-right" name="applyCheckForm" method="post">
-				<strong>사업자번호 등록여부 확인&nbsp;&nbsp;</strong>
-				<input class="form-control mr-sm-2" type="search" placeholder="숫자만 입력하세요." aria-label="search" type="text" id="cu_adcode" name="cu_adcode" value="" onkeypress="inNumber();">
+				<strong>사업자번호 등록 확인&nbsp;&nbsp;</strong>
+				<input class="form-control mr-sm-2" type="search" style="width:160px;" placeholder="숫자만 입력하세요." aria-label="search" type="text" id="cu_adcode" name="cu_adcode" value="" onkeypress="inNumber();">
 				<button class="btn btn-outline-success my-2 my-sm-0" type="submit" onkeypress="inNumber();" onClick="applyCheck()">검색</button>
 			</form>
 		</div>
 	</nav>
-	<div style="position: relative; width:100%; height:740px; background-repeat:no-repeat; background-position:center; background-image: URL(resources/image/login.jpg);">
-		<div style="position: absolute; top:51%; left:59.5%">
-			<form name="loginForm" action="loginProcess.do" method="post" style="width:230px;height:150px">
-				<label style="font-style: normal; font-size:15px; font-weight:bolder; color:#0064CD; margin-bottom:3px;">아이디</label>
-				<input type="text" name="userId" value="" class="form-control" style="width:100%; font-size:10px;" onkeypress="inNumber();" placeholder="ID : 계산서발행 사업자번호(공급받는자)">
-				<label style="font-style: normal; font-size:15px; font-weight:bolder; color:#0064CD; margin-bottom:3px;">비밀번호</label>
-				<input type="text" name="userPassword" value="" class="form-control" style="width:100%; font-size:10px" onkeypress="inNumber();" placeholder="PW : 계산서발행 사업자번호(공급받는자)">
-				<input type="checkbox" name="idsave" value="saveOk">
-				<label style="font-style: normal; font-size:15px; font-weight:bolder; color:#0064CD; margin-bottom:3px;">아이디 저장</label>
-				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button class="btn btn-sm btn-primary" type="button" style="margin-top:5px;" onClick="login();">로그인</button>
-			</form>			
+	<form name="loginForm" action="loginProcess.do" method="post">
+		<div style="position: relative; width:100%; height:740px; background-repeat:no-repeat; background-position:center; background-image: URL(resources/image/login.jpg);">
+			<div style="margin:0 auto; padding:370px 0px 0px 550px; height:730px; width:800px;">
+			  	<div>
+					<table style="width:230px;">
+						<tr>
+							<td colspan="2"><label style="font-style: normal; font-size:15px; font-weight:bolder; color:#0064CD; margin-bottom:3px;">아이디</label></td>
+						</tr>
+						<tr>
+							<td colspan="2"><input type="text" name="userId" value="" class="form-control" style="width:100%; font-size:10px;" onkeypress="inNumber();" placeholder="ID : 계산서발행 사업자번호(공급받는자)"></td>
+						</tr>
+						<tr>
+							<td colspan="2"><label style="font-style: normal; font-size:15px; font-weight:bolder; color:#0064CD; margin-bottom:3px;">비밀번호</label></td>
+						</tr>
+						<tr>
+							<td colspan="2"><input type="text" name="userPassword" value="" class="form-control" style="width:100%; font-size:10px" onkeypress="inNumber();" placeholder="PW : 계산서발행 사업자번호(공급받는자)"></td>
+						</tr>
+						<tr>
+							<td style="width:170px">
+								<input type="checkbox" name="idsave" value="saveOk">
+								<label style="font-style: normal; font-size:15px; font-weight:bolder; color:#0064CD; margin-bottom:3px;">아이디 저장</label>
+							</td>
+							<td>
+								<button class="btn btn-sm btn-primary" type="button" style="margin-top:5px;" onClick="login();">로그인</button>
+							</td>
+						</tr>
+					</table>	
+				</div>
+			</div>
 		</div>
-		<!-- <div style="position: absolute; top:75%; left:30%">
-			<font size="5px"><strong>익스플로러에서는 호환성 보기 설정에서 [hjit.co.kr]을 제거하세요</strong></font>
-		</div> -->
-	</div>
+	</form>	
 	
 	<!-- 모달 영역 -->
 	<div id="helpExplorerDetail" class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="helpExplorerDetail">

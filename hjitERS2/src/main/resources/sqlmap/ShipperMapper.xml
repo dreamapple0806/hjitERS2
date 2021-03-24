@@ -180,8 +180,8 @@
 				on a.vir_acctno = b.cma_account 
 		WHERE 
 			b.cu_gubun = '01' 
-			and a.tran_dd = to_char(sysdate, 'yyyymmdd') 
     		and b.cu_code = #{cu_code} 
+			and a.tran_dd = to_char(sysdate, 'yyyymmdd') 
     		and nvl(a.except,'0') = '0' 
     		and nvl(a.process,'0') = '0'
 	</select>	

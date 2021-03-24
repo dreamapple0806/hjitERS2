@@ -59,7 +59,7 @@
             <mapping path="/SearchContActionJson.do"/>			<!-- 일반납부 조회 -->
             <mapping path="/SearchPreContActionJson.do"/>		<!-- 사전납부 조회 -->
             <mapping path="/SearchVirAccountJson.do"/>			<!-- 가상계좌 조회 -->
-             
+            <mapping path="/contHoldRelease.do"/>			<!-- 저장 실행 -->             
             <beans:ref bean="AuthInterceptor"/>				
         </interceptor>
     </interceptors>
