@@ -167,7 +167,7 @@
 	            return false;
 			}			
 			if($('#edu_birth').val().length < 8){
-				Swal.fire("생년월일을 모두 입력해 주세요");
+				Swal.fire("생년월일을 모두 입력해 주세요.");
 	            return false;
 			}			
 			if($('#edu_phone').val() == ""){
