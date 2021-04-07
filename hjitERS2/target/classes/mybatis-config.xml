@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+	<settings>
+	  	<setting name="callSettersOnNulls" value="true"/>
+	</settings>
+	
+	<typeAliases>
+		<typeAlias alias="custVO" type="kr.co.hjitERS.vo.CustVO"/>
+		<typeAlias alias="loginVO" type="kr.co.hjitERS.vo.LoginVO"/>
+		<typeAlias alias="shipperVO" type="kr.co.hjitERS.vo.ShipperVO"/>
+		<typeAlias alias="shipperPreVO" type="kr.co.hjitERS.vo.ShipperPreVO"/>
+		<typeAlias alias="companyVO" type="kr.co.hjitERS.vo.CompanyVO"/>
+		<typeAlias alias="serialMainVO" type="kr.co.hjitERS.vo.SerialMainVO"/>
+		<typeAlias alias="serialSubVO" type="kr.co.hjitERS.vo.SerialSubVO"/>
+		<typeAlias alias="serialTaxVO" type="kr.co.hjitERS.vo.SerialTaxVO"/>
+		<typeAlias alias="junpyoVO" type="kr.co.hjitERS.vo.JunpyoVO"/>
+		<typeAlias alias="mibulVO" type="kr.co.hjitERS.vo.MibulVO"/>
+		<typeAlias alias="billTransVO" type="kr.co.hjitERS.vo.BillTransVO"/>
+		<typeAlias alias="billTransItem" type="kr.co.hjitERS.vo.BillTransItemVO"/>
+		
+		<typeAlias alias="taxProcessVO" type="kr.co.hjitERS.vo.TaxProcessVO"/>
+		<typeAlias alias="inAccountManageVO" type="kr.co.hjitERS.vo.InAccountManageVO"/>
+		<typeAlias alias="VirAcctVO" type="kr.co.hjitERS.vo.VirAcctVO"/>
+	</typeAliases>
+</configuration>
