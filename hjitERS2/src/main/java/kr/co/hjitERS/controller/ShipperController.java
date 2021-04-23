@@ -4,6 +4,7 @@ import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -64,7 +65,7 @@ public class ShipperController {
 	@RequestMapping(value = "/contHoldRelease.do")
 	public ModelAndView save(HttpServletRequest request, HttpServletResponse response, ModelAndView mav) throws Exception {
 		try {
-			logger.info("contHoldRelease.do");
+			logger.info("+++++ contHoldRelease.do +++++");
 			
 			String strErrMessage = "";
 		    String message = "";
@@ -125,7 +126,7 @@ public class ShipperController {
 					}
 					else {
 						shipVO = shipperService.HoldContAction(object.get("bie_ship_contno").getAsString(), object.get("bie_ship_point").getAsString(), object.get("bie_ship_hold").getAsString(), object.get("bie_ship_seq").getAsString());
-						logger.info("Inf Container Info : " + shipVO.toString());		
+						logger.info("Normal Container Info : " + shipVO.toString());		
 						holdContList.add(shipVO);
 					}
 				}		
@@ -261,12 +262,10 @@ public class ShipperController {
 
 			logger.info("validationCnt : " + validationCnt);
 			if(validationCnt > 0) {
-				logger.info("Already Processed Container Data Exist");
 				strErrMessage = "이미 처리된 컨테이너 정보가 있습니다.";
 				return strErrMessage;
 			}
 			else {
-				logger.info("Precessed Container Data not exist");
 				lstDataSub.add(beanSub);
 			}
 		}
@@ -284,7 +283,6 @@ public class ShipperController {
 			beaninaccount.setTran_hh(virAcctVO.getTran_hh());
 			beaninaccount.setVatrsno(virAcctVO.getVatrsno());
 			beaninaccount.setVaxclmthcd(virAcctVO.getVaxclmthcd());
-			beaninaccount.setProcess(virAcctVO.getProcess());
 			beaninaccount.setVatramt(virAcctVO.getIncom_amount());
 			
 			lstDatainaccount.add(beaninaccount);
@@ -309,7 +307,7 @@ public class ShipperController {
 	@ResponseBody
 	public ResponseEntity<String> SearchContActionJson(HttpServletRequest request, HttpServletResponse response, ModelAndView mav) throws Exception {
 		
-		logger.info("SearchContActionJson.do");
+		logger.info("+++++ SearchContActionJson.do +++++");
 	    
 	    String bie_ship_contno_shr = (String) request.getParameter("bie_ship_contno_shr").toUpperCase().trim();
 	    String bie_ship_blno_shr = (String) request.getParameter("bie_ship_blno_shr").toUpperCase().trim();
@@ -388,7 +386,7 @@ public class ShipperController {
 	@ResponseBody
 	public ResponseEntity<String> SearchPreContActionJson(HttpServletRequest request, HttpServletResponse response, ModelAndView mav) throws Exception {
 
-	    logger.info("SearchPreContActionJson.do");
+	    logger.info("+++++ SearchPreContActionJson.do +++++");
 
 	    String demurrage = (String) request.getParameter("bie_ship_symd_shr");	    
 	    String bie_ship_contno_shr = (String) request.getParameter("bie_ship_contno_shr").toUpperCase().trim();
@@ -410,7 +408,6 @@ public class ShipperController {
 	    	else {
 	    		bie_ship_blno_shr = bie_ship_blno_shr.replaceAll("-", "");  
 	    	}
-	    	logger.info("demurrage : " + demurrage);
 	    	demurrage = demurrage.replaceAll("-", "");	    	
 	    	
 		    logger.info("preSearch demurrage : " + demurrage + " / bie_ship_contno_shr : " + bie_ship_contno_shr + " / bie_ship_blno_shr : " + bie_ship_blno_shr);
@@ -493,14 +490,21 @@ public class ShipperController {
 	@ResponseBody
 	public ResponseEntity<String> SearchVirAccount(HttpServletRequest request, HttpServletResponse response, ModelAndView mav) throws Exception {
 
-		logger.info("SearchVirAccount_Json : " + request.getRequestedSessionId());
+		logger.info("+++++ SearchVirAccount_Json +++++");
 	    
 	    String cu_code = (String) request.getParameter("cu_code");
+	    String cma_account = (String) request.getParameter("cma_account");
+		SimpleDateFormat fmt = new SimpleDateFormat ( "yyyyMMdd");				
+		Calendar date = Calendar.getInstance();		       
+		String virAcct_date = fmt.format(date.getTime());
+		
+		logger.info("cma_account : " + cma_account + " / cu_code : " + cu_code + " / virAcct_date : " + virAcct_date);
+		
 	    HttpHeaders responseHeaders = new HttpHeaders();
 	    JSONArray json = new JSONArray(); 
 	    
 	    try {
-	    	ArrayList<InAccountManageVO> list = shipperService.SearchVirAccountJson(cu_code);
+	    	ArrayList<InAccountManageVO> list = shipperService.SearchVirAccountJson(cu_code, cma_account, virAcct_date);
 		    
 		    if(list.size() == 0) {
 		    	mav.addObject("message", "입금내역이 없습니다.");
@@ -542,7 +546,7 @@ public class ShipperController {
 	@RequestMapping(value = "/taxProcess.do")
 	public ModelAndView taxProcess(HttpServletRequest request, HttpServletResponse response, ModelAndView mav) throws Exception {
 
-	    logger.info("taxProcess.do");
+	    logger.info("+++++ taxProcess.do +++++");
 		HttpSession session =  request.getSession();
 		CustVO vo = (CustVO) session.getAttribute("userInfo");
 	    String message = "";
@@ -567,7 +571,7 @@ public class ShipperController {
 	//세금계산서 메뉴 이동
 	@RequestMapping(value = "/taxProcessList.do")
 	public ModelAndView taxProcessList(HttpServletRequest request, HttpServletResponse response, ModelAndView mav) throws Exception {
-	    logger.info("taxProcessList1");
+	    logger.info("+++++ taxProcessList.do1 +++++");
 
 		HttpSession session =  request.getSession();
 		CustVO vo = (CustVO) session.getAttribute("userInfo");
@@ -593,7 +597,7 @@ public class ShipperController {
 	//거래명세서 팝업
 	@RequestMapping(value = "/billPrintPopup.do")
 	public ModelAndView taxBill_Print(HttpServletRequest request, HttpServletResponse response, ModelAndView mav) throws Exception {
-	    logger.info("billPrintPopup.do");
+	    logger.info("+++++ billPrintPopup.do +++++");
 
 		HttpSession session =  request.getSession();
 		CustVO vo = (CustVO) session.getAttribute("userInfo");

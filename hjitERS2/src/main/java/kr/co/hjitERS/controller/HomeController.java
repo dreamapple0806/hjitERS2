@@ -1,8 +1,5 @@
 package kr.co.hjitERS.controller;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -26,16 +23,15 @@ public class HomeController {
 	@Resource(name = "loginService")
 	private LoginDAO loginService;
 	
-	@RequestMapping(value = "/") 
+	@RequestMapping(value = "") 
 	public String index(HttpServletRequest request, HttpServletResponse response, ModelAndView mav) throws Exception {
-		logger.info("HomeController");
 		HttpSession session = request.getSession();		
 		
     	if(session.getAttribute("userInfo") == null) {
-            return "/index";
+            return "index";
     	}
     	else {
-            return "/home";
+            return "home";
     	}
 	}	 
 }

@@ -68,12 +68,10 @@ public class JunpyoServiceImpl implements JunpyoDAO{
 
 			// 2. 홀드 해제시 전표생성 프로시져 실행
 			strErrMessage = junpyoDAO.save_junpyo(beanMain);
-    		logger.info("save_junpyo Result : " + strErrMessage);
 
 			// 3. 입금전표 생성
 			if(strErrMessage == null) {
 				strErrMessage = saveJunpyoMain(beanMain);
-	    		logger.info("saveJunpyoMain Result : " + strErrMessage);
 			} else{
             	strErrMessage = "전표생성 프로시져";
             	transactionManager(strErrMessage, status);
@@ -83,7 +81,6 @@ public class JunpyoServiceImpl implements JunpyoDAO{
 			// 4. 센드빌 세금계산서 발행
 			if(strErrMessage.equals("1")) {
 				strErrMessage = To_greenBillTb(beanMain, prePayment);
-	    		logger.info("To_greenBillTb Result : " + strErrMessage);
 			} else{
             	strErrMessage = "입금전표 에러";
             	transactionManager(strErrMessage, status);
@@ -93,7 +90,6 @@ public class JunpyoServiceImpl implements JunpyoDAO{
 			// 5. 홀드해지 - 프로시져 실행
 			if(strErrMessage.equals("1")) {
 				strErrMessage = save_tos(beanMain, lstDataSub, prePayment, demurrage);
-	    		logger.info("save_tos Result : " + strErrMessage);
 	    		
 			} else{
             	strErrMessage = "세금계산서 발송 에러";
@@ -122,11 +118,9 @@ public class JunpyoServiceImpl implements JunpyoDAO{
 	
 	public void transactionManager(String strErrMessage, TransactionStatus status) {
 		if (strErrMessage.equals("1")) {
-        	logger.info("transactionManager.commited : " + strErrMessage);
 			transactionManager.commit(status);	
     		status.flush();
         } else{
-        	logger.info("transactionManager.rollback : " + strErrMessage);
 			transactionManager.rollback(status);	
     		status.flush();
         }

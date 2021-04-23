@@ -136,7 +136,6 @@
 			a.vir_acctno, a.tran_dd, a.tran_hh, a.incom_amount, a.rndclrnm
 			, a.except, a.remark, a.istcd, a.vatrsno, a.vaxclmthcd
 			, b.cu_sangho , nvl(process_amount, 0) as outcom_amount
-			, case when nvl(a.process,'0') = '1' then '처리완료' else '미처리' end as process 
 		FROM 
 			hist_virt_acct_trori a 
 			left outer join c_cust b 
@@ -150,30 +149,11 @@
     		and a.vatrsno = #{vatrsno} 
 	</select>	
 	
-	<resultMap id="SearchVirAcctJsonResult" type="kr.co.hjitERS.vo.InAccountManageVO">		
-		<result property="vir_acctno" column="vir_acctno" />
-		<result property="tran_dd" column="tran_dd" />
-		<result property="tran_hh" column="tran_hh" />
-		<result property="incom_amount" column="incom_amount" />
-		<result property="rndclrnm" column="rndclrnm" />
-		
-		<result property="except" column="except" />
-		<result property="remark" column="remark" />
-		<result property="istcd" column="istcd" />
-		<result property="vatrsno" column="vatrsno" />
-		<result property="vaxclmthcd" column="vaxclmthcd" />
-		
-		<result property="cu_sangho" column="cu_sangho" />
-		<result property="outcom_amount" column="outcom_amount" />
-		<result property="process" column="process" />
-	</resultMap>		
-	
 	<select id="SearchVirAccountJson" resultType="InAccountManageVO" parameterType="String">
 		SELECT 
 			a.vir_acctno, a.tran_dd, a.tran_hh, a.incom_amount, a.rndclrnm
 			, a.except, a.remark, a.istcd, a.vatrsno, a.vaxclmthcd
 			, b.cu_sangho , nvl(process_amount, 0) as outcom_amount
-			, case when nvl(a.process,'0') = '1' then '처리완료' else '미처리' end as process 
 		FROM 
 			hist_virt_acct_trori a 
 			left outer join c_cust b 
@@ -181,7 +161,8 @@
 		WHERE 
 			b.cu_gubun = '01' 
     		and b.cu_code = #{cu_code} 
-			and a.tran_dd = to_char(sysdate, 'yyyymmdd') 
+    		and a.vir_acctno = #{cma_account}
+			and a.tran_dd = #{virAcct_date}
     		and nvl(a.except,'0') = '0' 
     		and nvl(a.process,'0') = '0'
 	</select>	

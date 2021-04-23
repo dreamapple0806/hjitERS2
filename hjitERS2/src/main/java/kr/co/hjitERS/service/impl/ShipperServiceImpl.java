@@ -38,8 +38,9 @@ public class ShipperServiceImpl implements ShipperDAO{
 	}
 
 	@Override
-	public ArrayList<InAccountManageVO> SearchVirAccountJson(String cu_code) throws Exception {
-		return shipperDAO.SearchVirAccountJson(cu_code);
+	public ArrayList<InAccountManageVO> SearchVirAccountJson(String cu_code, String cma_account, String virAcct_date) throws Exception {
+		logger.info("SearchVirAccountJson query excute");
+		return shipperDAO.SearchVirAccountJson(cu_code, cma_account, virAcct_date);
 	}
 
 	@Override

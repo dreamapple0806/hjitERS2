@@ -68,7 +68,7 @@
 			,ship_personal,ship_holddesc,ship_vessel,ship_voyage,ship_operator
 			,ship_type,ship_count,ship_unit,ship_qty,ship_rate,ship_total
 			,ship_amount,ship_vat_amt,ship_driver_name,ship_driver_hp,ship_truckno
-			,DECODE(ship_basedate, ' ', '-', ship_basedate) AS ship_basedate,ship_limitdate,ship_taxdate,ship_mrn,ship_invoiceno
+			,DECODE(ship_basedate, ' ', '-', '0', '-', ship_basedate) AS ship_basedate,ship_limitdate,ship_taxdate,ship_mrn,ship_invoiceno
 			,ship_vesselname,ship_arrive,inuser,indate,sale_class
 		FROM
 			s_shipper_sub

@@ -10,6 +10,8 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
+import kr.co.hjitERS.vo.CustVO;
+
 public class LoginInterceptor extends HandlerInterceptorAdapter{
     private static final Logger logger = LoggerFactory.getLogger(LoginInterceptor.class);
     
@@ -34,6 +36,7 @@ public class LoginInterceptor extends HandlerInterceptorAdapter{
     	
     	HttpSession session = request.getSession();
     	Object userInfo = session.getAttribute("userInfo");
+        CustVO vo = (CustVO) session.getAttribute("userInfo");
     	
     	if(userInfo != null) {
     		logger.info("userInfo is not null"); 

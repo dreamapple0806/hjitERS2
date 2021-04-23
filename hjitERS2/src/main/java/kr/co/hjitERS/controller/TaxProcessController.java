@@ -34,7 +34,7 @@ public class TaxProcessController {
 	
 	@RequestMapping(value = "/taxSearchProccess.do")
 	public ModelAndView taxSearchProccess(HttpServletRequest request, HttpServletResponse response, ModelAndView mav) throws Exception {
-	    logger.info("taxSearchProccess.do");
+	    logger.info("+++++ taxSearchProccess.do +++++");
 	    HttpSession session =  request.getSession(false);
 	    String message = "";
 	    
@@ -78,7 +78,7 @@ public class TaxProcessController {
 	
 	@RequestMapping(value = "/serialSearchProccess.do")
 	public ModelAndView serialSearchProccess(HttpServletRequest request, HttpServletResponse response, ModelAndView mav) throws Exception {
-	    logger.info("serialSearchProccess.do");
+	    logger.info("+++++ serialSearchProccess.do +++++");
     	HttpSession session =  request.getSession(false);
 	    String message = "";
 
@@ -119,7 +119,7 @@ public class TaxProcessController {
 	
 	@RequestMapping(value = "/taxPrintProccess.do")
 	public ModelAndView taxPrintProccess(HttpServletRequest request, HttpServletResponse response, ModelAndView mav) throws Exception {
-	    logger.info("taxPrintProccess.do");
+	    logger.info("+++++ taxPrintProccess.do +++++");
     	HttpSession session =  request.getSession(false);
 	    String message = "";
 
@@ -181,7 +181,7 @@ public class TaxProcessController {
 
 	@RequestMapping(value = "/taxBillPrintProccess.do")
 	public ModelAndView taxBillPrintProccess(HttpServletRequest request, HttpServletResponse response, ModelAndView mav) throws Exception {
-	    logger.info("taxBillPrintProccess.do");
+	    logger.info("+++++ taxBillPrintProccess.do +++++");
     	HttpSession session =  request.getSession();
 	    String message = "";
     	
@@ -229,8 +229,6 @@ public class TaxProcessController {
 				
 				request.setAttribute("listMain", vom);
 				request.setAttribute("listSub", listSub);
-				//request.setAttribute("comInfo", comInfo);
-				//request.setAttribute("vo", vo);
 	    	}
 		} catch (Exception e) {
 			e.printStackTrace();

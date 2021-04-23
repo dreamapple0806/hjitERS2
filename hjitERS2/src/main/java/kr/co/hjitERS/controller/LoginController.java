@@ -30,7 +30,7 @@ public class LoginController {
 	public String login(HttpServletRequest request, HttpServletResponse response, LoginVO lvo, ModelAndView mav) throws Exception {
 
 		try {
-		    logger.info("******* loginProcess Start *******");
+		    logger.info("+++++ loginProcess Start +++++");
 		    HttpSession session = request.getSession();
 		    String message = "";
 		    
@@ -70,14 +70,14 @@ public class LoginController {
 					mav.setViewName("home");
 				}
 		    }
-		    logger.info("******* loginProcess End *******");
-			return "/home";
+		    logger.info("+++++ loginProcess End +++++");
+			return "home";
 			
 		} catch (Exception e) {
 			logger.info("세션이 끊어졌습니다.");
 			e.printStackTrace();
 
-			return "/index";
+			return "index";
 		}
 	}
 
@@ -85,6 +85,6 @@ public class LoginController {
 	public String logout(HttpServletRequest request, HttpServletResponse response, HttpSession httpSession) throws Exception {
 		httpSession.invalidate();
 		
-		return "/userLogout";
+		return "userLogout";
 	}
 }

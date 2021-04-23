@@ -30,10 +30,13 @@ public class AuthInterceptor extends HandlerInterceptorAdapter{
         // 세션이 끊긴 창에서 요청시 세션에 있는 정보와 화면에서 받아온 정보 비교해서 다르면 강제로 로그아웃 처리
         if(!request.getParameter("cu_adcode").equals(vo.getCu_adcode())) {
         	logger.info("Session Information is changed");
-        	logger.info("request's Cu_adcode : " + request.getParameter("cu_adcode") + " / session's Cu_adcode : " + vo.getCu_adcode());
+
+        	logger.info("Session's Adcode : " + request.getParameter("cu_adcode"));
+        	logger.info("Request's Adcode : " + vo.getCu_adcode());
+        	
         	response.setContentType("text/html; charset=UTF-8");
         	PrintWriter out = response.getWriter(); 
-        	out.println("<script>location.href='logoutProcess.do';</script>");
+        	out.println("<script>location.href='/logoutProcess.do';</script>");
         	out.flush();
         	logger.info("+++++ AuthInterceptor Pre Controller End +++++");
         	
@@ -50,7 +53,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter{
         }
     	else{
     		logger.info("Session Information is not exist");
-    		logger.info("IP Information is " + ip);
+    		logger.info("IP Information is " + ip + " / " + (ip.equals(mip)));
     		response.sendError(500);
         	logger.info("+++++ AuthInterceptor Pre Controller End +++++");
         	

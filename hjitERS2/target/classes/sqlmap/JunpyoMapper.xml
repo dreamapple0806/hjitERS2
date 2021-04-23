@@ -36,7 +36,7 @@
 			A_JUNPYO 
 		WHERE 
 			JUN_GUBUN = '01' 
-    		AND JUN_NO LIKE '' || ${issue_date} || '%'
+    		AND JUN_NO LIKE '' || #{issue_date} || '%'
 	</select>	
     
 	<!-- id 속성은 DAO 의 메소드와 같아야 한다. 여기의 loginVO 는 mybatis-confg.xml 에 Alias 되어 있습니다. -->
@@ -47,7 +47,7 @@
 			A_JUNPYO 
 		WHERE 
 			JUN_GUBUN = '01' 
-    		AND JUN_NO LIKE '' || ${issue_date} || '%'
+    		AND JUN_NO LIKE '' || #{issue_date} || '%'
 	</select>	
 	
 	<!-- id 속성은 DAO 의 메소드와 같아야 한다. 여기의 loginVO 는 mybatis-confg.xml 에 Alias 되어 있습니다. -->
@@ -58,8 +58,8 @@
 			A_DEPOSIT_GCODE 
 		WHERE 
 			GUBUN = '01' 
-    		AND DEPO_YYYY = ${issue_date}
-    		AND DEPO_CLASS = ${deposit_class}
+    		AND DEPO_YYYY = #{issue_date}
+    		AND DEPO_CLASS = #{deposit_class}
 	</select>	
 	
 	<!-- id 속성은 DAO 의 메소드와 같아야 한다. 여기의 loginVO 는 mybatis-confg.xml 에 Alias 되어 있습니다. -->
@@ -82,15 +82,15 @@
       		, JUN_INBUSOR, JUN_INBUSORNM, JUN_INUSER, JUN_INUSERNM, JUN_INDATE 
       		, JUN_SORT, JUN_BANK, JUN_ACCOUNT 
       	FROM ( SELECT 
-      			'${jun_gubun}' AS GUBUN, '${jun_no}' AS JUN_NO, '${jun_gno}' AS JUN_GNO, '${depo_cd}' AS JUN_CD2,
-      			' ' AS JUN_CD2NAME, ' ' AS JUN_CDGUBUN, '${jun_chaak}' AS JUN_CHAAK, 0 AS JUN_DAEAK, '${jun_wdate}' AS JUN_WDATE, '${jun_wno}' AS JUN_WNO,
-      			'ERS' AS JUN_WNAME, ' ' AS JUN_JUKYO, '${jun_inbusor}' AS JUN_SBUSOR, '${jun_branch}' AS JUN_BRANCH,
-      			'${jun_inbusor}' AS JUN_INBUSOR, '${jun_inbusornm}' AS JUN_INBUSORNM, '${jun_inuser}' AS JUN_INUSER, '${jun_inusernm}' AS JUN_INUSERNM,
-      			TO_CHAR(SYSDATE, 'YYYYMMDD') AS JUN_INDATE, '${jun_sort}' AS JUN_SORT, '${depo_bankcd}' AS JUN_BANK,
-      			'${depo_account}' AS JUN_ACCOUNT FROM DUAL ) A 
+      			#{jun_gubun} AS GUBUN, #{jun_no} AS JUN_NO, #{jun_gno} AS JUN_GNO, #{depo_cd} AS JUN_CD2,
+      			' ' AS JUN_CD2NAME, ' ' AS JUN_CDGUBUN, #{jun_chaak} AS JUN_CHAAK, 0 AS JUN_DAEAK, #{jun_wdate} AS JUN_WDATE, #{jun_wno} AS JUN_WNO,
+      			'ERS' AS JUN_WNAME, ' ' AS JUN_JUKYO, #{jun_inbusor} AS JUN_SBUSOR, #{jun_branch} AS JUN_BRANCH,
+      			#{jun_inbusor} AS JUN_INBUSOR, #{jun_inbusornm} AS JUN_INBUSORNM, #{jun_inuser} AS JUN_INUSER, #{jun_inusernm} AS JUN_INUSERNM,
+      			TO_CHAR(SYSDATE, 'YYYYMMDD') AS JUN_INDATE, #{jun_sort} AS JUN_SORT, #{depo_bankcd} AS JUN_BANK,
+      			#{depo_account} AS JUN_ACCOUNT FROM DUAL ) A 
       	LEFT OUTER JOIN A_G_CODE B ON A.GUBUN = B.GC_GUBUN 
 			AND  SUBSTR(A.JUN_NO,1,4) = B.GC_SYY 
-			AND  B.GC_CD2 = '${depo_cd}'
+			AND  B.GC_CD2 = #{depo_cd}
     </insert>
     
 	<!-- id 속성은 DAO 의 메소드와 같아야 한다. 여기의 loginVO 는 mybatis-confg.xml 에 Alias 되어 있습니다. -->
@@ -106,32 +106,32 @@
             , JUN_SORT, JUN_SANGNO, JUN_SANGGNO, JUN_CUST 
           ) 
         	SELECT SUB.* FROM  (
-        		SELECT A.GUBUN, '${jun_no}' as jun_no, '${jun_gno}' as jun_gno, B.GC_CD1, '${depo_contracd}' as jun_cd2 
-                 	, B.GC_NAME, B.GC_CDGUBUN, 0 as jun_chaak, '${jun_chaak}' as jun_daeak, '${jun_wdate}' as jun_wdate 
-                 	, '${jun_wno}' as jun_wno, 'ERS' as jun_wname, '화주입금' || A.SERIAL as jun_jukyo, '${jun_inbusor}' as jun_sbusor, '${jun_branch}' as jun_branch 
-         			, '${jun_inbusor}' as jun_inbusor, '${jun_inbusornm}' as jun_inbusornm, '${jun_inuser}' as jun_inuser, '${jun_inusernm}' as jun_inusernm
-         			, TO_CHAR(SYSDATE, 'YYYYMMDD') as jun_indate, '${jun_sort}' as jun_sort, A.JUN_NO AS JUN_SANGNO, '1' AS JUN_SANGGNO, '${jun_cust}' as jun_cust 
+        		SELECT A.GUBUN, #{jun_no} as jun_no, #{jun_gno} as jun_gno, B.GC_CD1, #{depo_contracd} as jun_cd2 
+                 	, B.GC_NAME, B.GC_CDGUBUN, 0 as jun_chaak, #{jun_chaak} as jun_daeak, #{jun_wdate} as jun_wdate 
+                 	, #{jun_wno} as jun_wno, 'ERS' as jun_wname, '화주입금' || A.SERIAL as jun_jukyo, #{jun_inbusor} as jun_sbusor, #{jun_branch} as jun_branch 
+         			, #{jun_inbusor} as jun_inbusor, #{jun_inbusornm} as jun_inbusornm, #{jun_inuser} as jun_inuser, #{jun_inusernm} as jun_inusernm
+         			, TO_CHAR(SYSDATE, 'YYYYMMDD') as jun_indate, #{jun_sort} as jun_sort, A.JUN_NO AS JUN_SANGNO, '1' AS JUN_SANGGNO, #{jun_cust} as jun_cust 
 				FROM S_SHIPPER_MAIN A
  				LEFT OUTER JOIN A_G_CODE B 
         			ON A.GUBUN = B.GC_GUBUN 
        			AND SUBSTR(${jun_no},0,4) = B.GC_SYY 
-       			AND '${depo_contracd}' = B.GC_CD2 
+       			AND #{depo_contracd} = B.GC_CD2 
 				UNION ALL 
-				SELECT A.GUBUN, '${jun_no}' as jun_no, '${jun_gno}' as jun_gno,B.GC_CD1, '${depo_cd}' as jun_cd2 
-         			, B.GC_NAME, B.GC_CDGUBUN, 0 as jun_chaak, '${jun_chaak}' as jun_daeak, '${jun_wdate}' as jun_wdate 
-         			, '${jun_wno}' as jun_wno, 'ERS' as jun_wname, '화주입금' || A.JUN_NO as jun_jukyo, '${jun_inbusor}' as jun_sbusor, '${jun_branch}' as jun_branch 
-         			, '${jun_inbusor}' as jun_inbusor, '${jun_inbusornm}' as jun_inbusornm, '${jun_inuser}' as jun_inuser, '${jun_inusernm}' as jun_inusernm, TO_CHAR(SYSDATE, 'YYYYMMDD') as jun_indate 
-         			, '${jun_sort}' as jun_sort, A.JUN_NO AS JUN_SANGNO, '1' AS JUN_SANGGNO, '${jun_cust}' as jun_cust
+				SELECT A.GUBUN, #{jun_no} as jun_no, #{jun_gno} as jun_gno,B.GC_CD1, #{depo_cd} as jun_cd2 
+         			, B.GC_NAME, B.GC_CDGUBUN, 0 as jun_chaak, #{jun_chaak} as jun_daeak, #{jun_wdate} as jun_wdate 
+         			, #{jun_wno} as jun_wno, 'ERS' as jun_wname, '화주입금' || A.JUN_NO as jun_jukyo, #{jun_inbusor} as jun_sbusor, #{jun_branch} as jun_branch 
+         			, #{jun_inbusor} as jun_inbusor, #{jun_inbusornm} as jun_inbusornm, #{jun_inuser} as jun_inuser, #{jun_inusernm} as jun_inusernm, TO_CHAR(SYSDATE, 'YYYYMMDD') as jun_indate 
+         			, #{jun_sort} as jun_sort, A.JUN_NO AS JUN_SANGNO, '1' AS JUN_SANGGNO, #{jun_cust} as jun_cust
   				FROM s_basic_bond A
  				LEFT OUTER JOIN A_G_CODE B 
         			ON A.GUBUN = B.GC_GUBUN 
        			AND SUBSTR(${jun_no},0,4) = B.GC_SYY 
-       			AND '${depo_contracd}' = B.GC_CD2  
-  				WHERE A.gubun = '${jun_gubun}' 
-    				AND A.cu_code = '${jun_cust}' 
+       			AND #{depo_contracd} = B.GC_CD2  
+  				WHERE A.gubun = #{jun_gubun} 
+    				AND A.cu_code = #{jun_cust} 
     				AND A.bond_class = '20') SUB
-       				WHERE SUB.GUBUN = '${jun_gubun}'
-       				AND SUB.JUN_SANGNO = '${sang_jun_no}'
+       				WHERE SUB.GUBUN = #{jun_gubun}
+       				AND SUB.JUN_SANGNO = #{sang_jun_no}
     </insert>
     
     <insert id="insertMibul" parameterType="mibulVO">
@@ -146,23 +146,23 @@
 		SELECT SUB. * 
 		FROM (
 			SELECT 
-				A.GUBUN,'${jun_no}','${jun_gno}','${jun_branch}',0,'${depo_contracd}' 
-				,'${jun_inuser}','0','1',A.SHIP_TOT, A.JUN_NO 
-				,1, ${jun_chaak}, '${jun_wdate}', ' ' 
+				A.GUBUN,#{jun_no},#{jun_gno},#{jun_branch},0,#{depo_contracd} 
+				,#{jun_inuser},'0','1',A.SHIP_TOT, A.JUN_NO 
+				,1, ${jun_chaak}, #{jun_wdate}, ' ' 
 				,'ERS',TO_CHAR(SYSDATE, 'YYYYMMDD') AS INDATE 
   			FROM  S_SHIPPER_MAIN A 
 			UNION ALL 
 			SELECT 
-				A.GUBUN,'${jun_no}','${jun_gno}','${jun_branch}',0,'${depo_contracd}' 
-				,'${jun_inuser}','0','1',A.BOND_AMT, A.JUN_NO 
-				,1, ${jun_chaak}, '${jun_wdate}', ' ' 
+				A.GUBUN,#{jun_no},#{jun_gno},#{jun_branch},0,#{depo_contracd} 
+				,#{jun_inuser},'0','1',A.BOND_AMT, A.JUN_NO 
+				,1, ${jun_chaak}, #{jun_wdate}, ' ' 
 				,'ERS',TO_CHAR(SYSDATE, 'YYYYMMDD') AS INDATE 
   			FROM  S_BASIC_BOND A 
   			WHERE A.GUBUN = '01' 
-    			AND A.CU_CODE = '${jun_inuser}' 
+    			AND A.CU_CODE = #{jun_inuser} 
     			AND A.BOND_CLASS = '20') SUB
   		WHERE SUB.GUBUN = '01' 
-  			AND SUB.JUN_NO = '${sang_jun_no}'
+  			AND SUB.JUN_NO = #{sang_jun_no}
     </insert>
     
     <insert id="insertSInJunpyo" parameterType="mibulVO">
@@ -174,16 +174,16 @@
 			(GUBUN, IN_JUN_NO, JUN_NO, INUSER, INDATE) 
 		SELECT SUB. * 
 		FROM (
-			SELECT '01' AS GUBUN,'${jun_no}' AS IN_JUN_NO, A.JUN_NO, 'ERS', TO_CHAR(SYSDATE, 'YYYYMMDD') AS INDATE
+			SELECT '01' AS GUBUN,#{jun_no} AS IN_JUN_NO, A.JUN_NO, 'ERS', TO_CHAR(SYSDATE, 'YYYYMMDD') AS INDATE
 			FROM S_SHIPPER_MAIN A 
 			UNION ALL 
-			SELECT '01'  AS GUBUN,'${jun_no}' AS IN_JUN_NO, A.JUN_NO, 'ERS', TO_CHAR(SYSDATE, 'YYYYMMDD') AS INDATE
+			SELECT '01'  AS GUBUN,#{jun_no} AS IN_JUN_NO, A.JUN_NO, 'ERS', TO_CHAR(SYSDATE, 'YYYYMMDD') AS INDATE
 			FROM S_BASIC_BOND A 
   		WHERE A.GUBUN = '01' 
-    		AND A.CU_CODE = '${jun_inuser}' 
+    		AND A.CU_CODE = #{jun_inuser} 
     		AND A.BOND_CLASS = '20') SUB
   		WHERE SUB.GUBUN = '01' 
-  			AND SUB.JUN_NO = '${sang_jun_no}'
+  			AND SUB.JUN_NO = #{sang_jun_no}
     </insert>
 	
 	<!-- id 속성은 DAO 의 메소드와 같아야 한다. 여기의 loginVO 는 mybatis-confg.xml 에 Alias 되어 있습니다. -->
@@ -320,8 +320,8 @@
 			LPAD(TO_NUMBER(SUBSTR(MAX(BILLSEQ),13)) + 1, 13, 0) AS MAXSEQ
 		FROM
 			BILL_TRANS
-		WHERE BILLSEQ LIKE '${seq}%'
-    </select>
+		WHERE BILLSEQ LIKE '%'||#{seq}||'%'
+    </select>              
     
 	<!-- id 속성은 DAO 의 메소드와 같아야 한다. 여기의 loginVO 는 mybatis-confg.xml 에 Alias 되어 있습니다. -->
 	<insert id="saveBillTrans" parameterType="billTransVO">
@@ -336,12 +336,12 @@
 			RCEONAME, RUPTAE, RUPJONG, RADDRESS, RADDRESS2, RUSER,
 			RDIVISION, RTELNO, REMAIL, CREATE_DT, REPORT_ISSUE_ID, TRANSYN, ETC04)
 		VALUES( 
-			'${billseq}','${svenderno}','${rvenderno}','${dt}','${supmoney}','${taxmoney} '
-			,'${taxrate}','${cash}','${checks}','${note}','${credit}','${gubun}','${cma_account} / ${bigo}','${billtype}'
-			,'${scompany}','${sceoname}','${suptae}','${supjong}','${saddress}','${saddress2}'
-			,'${suser}','${sdivision}','${stelno}','${semail}','${sreg_id}','${rcompany}'
-			,'${rceoname}','${ruptae}','${rupjong}','${raddress}','${raddress2}','${ruser}' 
-			,'${rdivision}','${rtelno}','${remail}',to_char(sysdate,'yyyymmdd'),' ', 'N', '${etc04}')
+			#{billseq}, #{svenderno}, #{rvenderno}, #{dt}, #{supmoney}, #{taxmoney}
+			, #{taxrate}, #{cash}, #{checks}, #{note}, #{credit}, #{gubun}, '${cma_account} / ${bigo}', #{billtype}
+			, #{scompany}, #{sceoname}, #{suptae}, #{supjong}, #{saddress}, #{saddress2}
+			, #{suser}, #{sdivision}, #{stelno}, #{semail}, #{sreg_id}, #{rcompany}
+			, #{rceoname}, #{ruptae}, #{rupjong}, #{raddress}, #{raddress2}, #{ruser} 
+			, #{rdivision}, #{rtelno}, #{remail}, to_char(sysdate,'yyyymmdd'),' ', 'N', #{etc04})
     </insert>
     
 	<!-- id 속성은 DAO 의 메소드와 같아야 한다. 여기의 loginVO 는 mybatis-confg.xml 에 Alias 되어 있습니다. -->
@@ -353,8 +353,8 @@
         INSERT INTO BILL_TRANS_ITEM (
         	BILLSEQ, ITEMSEQ, TAX, SUP, DANGA, VLM,UNIT, OBJ, DT, REMARK)
 		VALUES( 
-			'${billseq}','${itemseq}','${tax}','${sup}','${danga}'
-			,'${vlm}','${unit}','${obj}','${dt}','${remark}' )
+			#{billseq},#{itemseq},#{tax},#{sup},#{danga}
+			,#{vlm},#{unit},#{obj},#{dt},#{remark} )
     </insert>
     
 	<!-- id 속성은 DAO 의 메소드와 같아야 한다. 여기의 loginVO 는 mybatis-confg.xml 에 Alias 되어 있습니다. -->

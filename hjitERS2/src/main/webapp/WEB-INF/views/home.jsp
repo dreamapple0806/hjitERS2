@@ -25,6 +25,7 @@
 <script src="resources/lib/js/util.js"></script>
 <script src="resources/lib/jsDelivr/sweetalert2.all.min.js"></script>
 <script src="resources/lib/jsDelivr/promise.min.js"></script>
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 
 <style>
 	@font-face{
@@ -52,6 +53,10 @@
         String s = d.toString();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String eymd = sdf.format(d);
+        
+        response.setHeader("Pragma","no-cache"); 
+        response.setDateHeader("Expires",0); 
+        response.setHeader("Cache-Control", "no-cache");
 	%>
 	<nav class="navbar navbar-expand-lg navbar-light bg-light">
 		<a class="navbar-brand" href="./taxProcess.do">
@@ -141,9 +146,9 @@
 	      			<tr>
         				<td><input class="form-control mr-sm-2 text-center" style="font-size:9pt; height:30px;" type="text" id="cu_sangho" name="cu_sangho" value="${userInfo.cu_sangho}" placeholder="" aria-label="cu_sangho" readonly></td>
         				<td><input class="form-control mr-sm-2 text-center" style="font-size:9pt; height:30px;" type="text" id="cu_adcode" name="cu_adcode" value="${userInfo.cu_adcode}" placeholder="" aria-label="cu_adcode" readonly></td>
-        				<td><input class="form-control mr-sm-2 text-center" style="font-size:9pt; height:30px;" type="text" id="take_user" name="take_user" value="${userInfo.cu_takeuser}" placeholder="" aria-label="take_user" disabled></td>
+        				<td><input class="form-control mr-sm-2 text-center" style="font-size:9pt; height:30px;" type="text" id="take_user" name="take_user" value="${userInfo.cu_takeuser}" placeholder="" aria-label="take_user" readonly></td>
 						<td><input class="form-control mr-sm-2 text-center" style="font-size:9pt; height:30px;" type="text" id="take_usermail" name="take_usermail" value="${userInfo.cu_takeusermail}" placeholder="" aria-label="take_usermail"></td>
-						<td><input class="form-control mr-sm-2 text-center" style="font-size:9pt; height:30px;" type="text" id="cma_account" name="cma_account" value="${userInfo.cma_account}" placeholder="" aria-label="cma_account" disabled></td>
+						<td><input class="form-control mr-sm-2 text-center" style="font-size:9pt; height:30px;" type="text" id="cma_account" name="cma_account" value="${userInfo.cma_account}" placeholder="" aria-label="cma_account" readonly></td>
         			</tr>
     			</tbody>
 			</table>
@@ -175,7 +180,10 @@
 	<div class="card bg-light mt-3 container">
 		<div class="card-header bg-light show-grid" style="border: 1px soild gray">
 			<h5 class="card-title">
-				<span class='text-danger font-weight-bold'>ERS 사용과 관련한 환불 및 주의사항</span>
+				<span class='text-danger font-weight-bold'>ERS 사용과 관련한 환불 및 주의사항</span>&nbsp;
+				<span class='text-info font-weight-light'>
+					<font size="3">※ 본 사이트는 크롬브라우저에 최적화 되어있습니다. <a href="https://bit.ly/3mcVtKa" target="_blank">[크롬다운로드]</a></font>
+				</span>
 			</h5>
 			<table class="table table-bordered table-condensed " style="font-size:9pt">
     			<tbody>
@@ -259,6 +267,10 @@
 	      					<td colspan="5">
 	      						<strong>
 	      						※ 조회 결과가 없는 경우, 터미널 홈페이지 <a href="http://59.17.254.10:9130/esvc/" target="_blank">정보서비스</a>를 통해 컨테이너 [홀드정보] 또는 [비용발생여부]를 확인하시기 바랍니다.
+	      						</strong>
+	      						<br>
+	      						<strong>
+	      						<font color="red">※ Internet Explorer를 통해 접속하시는 경우, 호환성 보기 옵션에서 [hjit.co.kr] 항목을 제거한 뒤 사용하시기 바랍니다.</font>
 	      						</strong>
 	      					</td>
 	      				</tr>
@@ -490,7 +502,8 @@
 	<footer class="mt-3 p-3 text-center font-weight-normal" style="background-color: #f8f9fa">
 		Copyright 2020 Hanjin Incheon Container Terminal All Rights Reserved.
 		<address>주소 : 인천광역시 연수구 인천신항대로 777 한진인천컨테이너터미널&nbsp;&nbsp;&nbsp;
-		사업자번호 : 131-86-66125&nbsp;&nbsp;&nbsp;TEL : 032) 202 - 4900&nbsp;&nbsp;&nbsp;FAX : 032) 821 - 9072</address>
+		사업자번호 : 131-86-66125&nbsp;&nbsp;&nbsp;TEL : 032) 202 - 4900&nbsp;&nbsp;&nbsp;FAX : 032) 821 - 9072
+		</address>
 	</footer>
 </body>
 	<script>
@@ -722,7 +735,7 @@
 		        			  '다시 로그인 해주세요.',
 		        			  'question'
 		        	);
-		        	location.href = "/";
+					location.href='logoutProcess.do';
 		        }
 		    });
 		}
@@ -964,10 +977,12 @@
 		// 가상계좌 입금내역 조회
 		function SearchVirAccountJson(){			
 			$.ajax({
-		        type:'POST',
+				type:'POST',
 		        url : "/SearchVirAccountJson.do",
-		        data:$("#Form").serialize(),
+		        cache : false,
+		        data : $("#Form").serialize(),
 		        contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+				dataType: 'JSON',
 		        success : function(data){
 		        	var html = "";
 		        	
@@ -982,7 +997,6 @@
 							html += "rndclrnm = '" + data[i].rndclrnm +  "'";
 							html += "except = '" + data[i].except +  "'"; 
 							html += "remark = '" + data[i].remark +  "'"; 
-							html += "process = '" + data[i].process +  "'"; 
 							html += "serial = '" + data[i].serial +  "'";
 							
 							html += "vatrsno = '" + data[i].vatrsno +  "'";
@@ -1022,12 +1036,38 @@
 		            }
 		        },
 		        error:function(request,status,error){
-		        	Swal.fire(
-		        			  '로그인 세션이 끊어졌습니다.',
-		        			  '다시 로그인 해주세요.',
-		        			  'question'
-		        	);
-		        	location.href = "/";
+		        	swal({
+						title : '로그인 세션이 끊어졌습니다.',
+						text : '다시 로그인 해주세요.',
+						icon : 'error',
+						closeOnClickOutside: false,
+						
+						buttons : {
+							confirm : {
+								text : '로그인 창으로',
+								value : true,
+								className : 'btn btn-primary'
+							}
+						}
+					}).then((result) => {
+						if(result){
+							swal('페이지 이동', '로그인 창으로 이동합니다.', 'success', {
+								closeOnClickOutside: false,
+								closeOnEsc: false,
+								buttons : {
+									confirm : {
+										text : '확인',
+										value : true,
+										className : 'btn btn-primary'
+									}
+								}
+							}).then((result) => {
+								if(result){
+									location.href='logoutProcess.do';
+								}
+							});
+						}
+					});
 		        }
 		    });
 		}
@@ -1108,7 +1148,7 @@
 		        	
 		        	var f = document.forms[0];
 		        	f.action = "contHoldRelease.do";
-		        	f.target = "";
+		        	f.target = "home";
 		        	f.submit();
 	        	}
 			}

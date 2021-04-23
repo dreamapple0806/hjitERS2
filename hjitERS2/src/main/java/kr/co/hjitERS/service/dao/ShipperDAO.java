@@ -15,7 +15,7 @@ public interface ShipperDAO {
 	ShipperVO Search_PrePaymentCont_SelectOne(@Param("bie_ship_contno_shr") String bie_ship_contno_shr, @Param("bie_ship_blno_shr") String bie_ship_blno_shr
 			, String prePayment, @Param("bie_ship_hold") String bie_ship_hold) throws Exception;
 	
-	ArrayList<InAccountManageVO> SearchVirAccountJson(@Param("cu_code") String cu_code) throws Exception;
+	ArrayList<InAccountManageVO> SearchVirAccountJson(@Param("cu_code") String cu_code, @Param("cma_account") String cma_account, @Param("virAcct_date") String virAcct_date) throws Exception;
 	
 	ShipperVO HoldContAction(@Param("bie_ship_contno") String bie_ship_contno, @Param("bie_ship_point") String bie_ship_point, @Param("bie_ship_hold") String bie_ship_hold, @Param("bie_ship_seq") String bie_ship_seq) throws Exception;
 	InAccountManageVO holdPurchaseVirAccount(@Param("vir_acctno") String vir_acctno, @Param("tran_dd") String tran_dd, @Param("tran_hh") String tran_hh

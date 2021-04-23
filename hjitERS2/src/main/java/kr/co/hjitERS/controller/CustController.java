@@ -29,7 +29,6 @@ public class CustController {
 	@RequestMapping(value = "/userRegisterAction.do")
 	public ModelAndView checkRegistedCustomer(HttpServletRequest request, HttpServletResponse response, CustVO vo, ModelAndView mav) throws Exception {
 
-	    logger.info("checkRegistedCustomer");
 	    String cu_adcode = (String) request.getParameter("cu_adcode");
 	    vo.setCu_adcode(FormatUtil.nvl(cu_adcode, " ") );
 		int result = custService.checkRegistedCustomer(vo);

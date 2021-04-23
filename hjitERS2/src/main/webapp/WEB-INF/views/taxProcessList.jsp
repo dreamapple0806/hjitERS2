@@ -46,7 +46,10 @@
         
         String symd = sdf.format(d);
         String eymd = edf.format(d);
-        		
+        
+        response.setHeader("Pragma","no-cache"); 
+        response.setDateHeader("Expires",0); 
+        response.setHeader("Cache-Control", "no-cache");
 	%>
 	<nav class="navbar navbar-expand-lg navbar-light bg-light">
 		<a class="navbar-brand" href="./taxProcess.do">
