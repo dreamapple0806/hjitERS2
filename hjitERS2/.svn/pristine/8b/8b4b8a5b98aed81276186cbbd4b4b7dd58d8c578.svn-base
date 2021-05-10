@@ -1,0 +1,627 @@
+package kr.co.hjitERS.controller;
+
+import java.io.PrintWriter;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+import kr.co.hjitERS.service.dao.JunpyoDAO;
+import kr.co.hjitERS.service.dao.SerialDAO;
+import kr.co.hjitERS.service.dao.ShipperDAO;
+import kr.co.hjitERS.service.dao.TaxProcessDAO;
+import kr.co.hjitERS.util.FormatUtil;
+import kr.co.hjitERS.vo.CompanyVO;
+import kr.co.hjitERS.vo.CustVO;
+import kr.co.hjitERS.vo.InAccountManageVO;
+import kr.co.hjitERS.vo.SerialMainVO;
+import kr.co.hjitERS.vo.SerialSubVO;
+import kr.co.hjitERS.vo.ShipperVO;
+import kr.co.hjitERS.vo.VirAcctVO;
+import net.sf.json.JSONArray;
+
+@Controller
+@Transactional
+public class ShipperController {
+    private static final Logger logger = LoggerFactory.getLogger(ShipperController.class);
+    
+	@Resource(name = "shipperService")
+	private ShipperDAO shipperService;
+	
+	@Resource(name = "serialService")
+	private SerialDAO serialService;
+	
+	@Resource(name = "junpyoService")
+	private JunpyoDAO junpyoService;
+
+	@Resource(name = "taxProcessService")
+	private TaxProcessDAO taxProcessService;
+	
+	//저장버튼(홀드해제 처리)
+	@ResponseBody
+	@RequestMapping(value = "/contHoldRelease.do")
+	public ModelAndView save(HttpServletRequest request, HttpServletResponse response, ModelAndView mav) throws Exception {
+		try {
+			logger.info("contHoldRelease.do");
+			
+			String strErrMessage = "";
+		    String message = "";
+			HttpSession session =  request.getSession();
+			CustVO vo = (CustVO) session.getAttribute("userInfo");
+			int infCount = 0; 	
+			
+			if(vo == null) {
+				logger.info("로그인정보가 없습니다.");
+				mav.addObject("message", "로그인정보가 없습니다.");
+				mav.setViewName("index");
+
+	    		message = "로그인 세션이 끊어졌습니다.";
+	    		FormatUtil.alertFunction(response, message);
+
+				return mav;
+			}
+			else {
+				SerialMainVO beanMain = new SerialMainVO(); 
+				beanMain.setGubun("01");
+				beanMain.setSale_class("20");
+				beanMain.setIssue_date((String) request.getParameter("issue_date").replace("-", ""));
+				beanMain.setCu_code(vo.getCu_code());
+				beanMain.setTake_user(vo.getCu_takeuser());
+				beanMain.setTake_usermail((String) request.getParameter("take_usermail"));
+				beanMain.setInuser(vo.getCu_code()); 
+				beanMain.setIndate((String) request.getParameter("issue_date").replaceAll("-", ""));
+				beanMain.setProc_type("0");
+				beanMain.setShip_customs("");
+				beanMain.setTax_snum("");
+				beanMain.setShip_tot(FormatUtil.nvl((String) request.getParameter("ship_tot"), "0").replaceAll(",", ""));
+				beanMain.setShip_amt(FormatUtil.nvl((String) request.getParameter("ship_amt"), "0").replaceAll(",", ""));
+				beanMain.setShip_vat(FormatUtil.nvl((String) request.getParameter("ship_vat"), "0").replaceAll(",", ""));
+				beanMain.setShip_dep(FormatUtil.nvl((String) request.getParameter("ship_tot"), "0").replaceAll(",", ""));
+				
+				String prePayment = (String) request.getParameter("prePaidY");		
+				String holdContData = (String)request.getParameter("holdContData");
+				String virAcctData = (String) request.getParameter("virAcctData");
+				
+				JsonParser jsonParser = new JsonParser();
+				JsonArray holdContDataArray = (JsonArray) jsonParser.parse(holdContData);
+				JsonArray virAcctDataArray = (JsonArray) jsonParser.parse(virAcctData);
+				
+				ArrayList<Object> holdContList = new ArrayList<Object>();
+				ArrayList<InAccountManageVO> virAcctList = new ArrayList<InAccountManageVO>();
+				
+				logger.info(vo.getCu_adcode() + "'s Selected HoldContainer Count : " + holdContDataArray.size()  + " / prePayment : " + prePayment);
+				
+				// 선택한 컨테이너 정보 조회
+				for(int i=0; i<holdContDataArray.size(); i++) {
+					JsonObject object = (JsonObject) holdContDataArray.get(i);
+					ShipperVO shipVO = new ShipperVO();
+					if(prePayment.equals("Y")) {
+						shipVO = shipperService.Search_PrePaymentCont_SelectOne(FormatUtil.nvl(object.get("bie_ship_contno").getAsString(), " ").replaceAll(" ", "")
+								, FormatUtil.nvl(object.get("bie_ship_blno").getAsString(), " ").replaceAll(" ", ""), prePayment, object.get("bie_ship_hold").getAsString());
+						logger.info("ForeCast Container Info : " + shipVO.toString());
+						holdContList.add(shipVO);
+					}
+					else {
+						shipVO = shipperService.HoldContAction(object.get("bie_ship_contno").getAsString(), object.get("bie_ship_point").getAsString(), object.get("bie_ship_hold").getAsString(), object.get("bie_ship_seq").getAsString());
+						logger.info("Inf Container Info : " + shipVO.toString());		
+						holdContList.add(shipVO);
+					}
+				}		
+
+				// 가상계좌 입금내역 조회
+				for(int a=0; a<virAcctDataArray.size(); a++) {
+					JsonObject object = (JsonObject) virAcctDataArray.get(a);
+					InAccountManageVO iAccountMagVO = shipperService.holdPurchaseVirAccount(object.get("vir_acctno").getAsString(), object.get("tran_dd").getAsString()
+							, object.get("tran_hh").getAsString(), object.get("incom_amount").getAsString(), object.get("vatrsno").getAsString());
+					logger.info("Virtual Account Info : " + iAccountMagVO.toString());
+					virAcctList.add(iAccountMagVO);
+				}
+				
+				// 컨테이너 인터페이스 테이블에서 홀드처리되어있는지 여부 조회
+				// (BIE_SHIP_POINT null, BIE_SHIP_HOLD null, BIE_SHIP_SEQ 1,  BIE_SHIP_PAYMENT 1, BIE_SHIP_ERPCONFIRM 1)
+				for(int i=0; i<holdContList.size(); i++) {
+					ShipperVO shipVO = (ShipperVO) holdContList.get(i);
+					infCount += shipperService.searchCntInf(FormatUtil.nvl(shipVO.getBie_ship_contno(), ""), FormatUtil.nvl(shipVO.getBie_ship_blno(), "")
+							, FormatUtil.nvl(shipVO.getBie_ship_point(), ""), FormatUtil.nvl(shipVO.getBie_ship_hold(), ""), FormatUtil.nvl(shipVO.getBie_ship_seq(), ""));
+					logger.info("Container Interface Count : " + infCount);
+				}
+				
+				// 홀드해제시 발행하는 계산서 데이터 생성
+				if(infCount >= 0 && prePayment.equals("Y")) {
+					strErrMessage = save_sub_function(request, response, holdContList, virAcctList, beanMain, vo, prePayment);
+					logger.info("PrePaid Junpyo Data Process Result : " + strErrMessage);
+				}
+				else if(infCount == 0 && prePayment.equals("N")){
+					logger.info("일반납부 전표 데이터 생성");
+					strErrMessage = save_sub_function(request, response, holdContList, virAcctList, beanMain, vo, prePayment);
+					logger.info("Normal Paid Junpyo Data Process Result : " + strErrMessage);
+				}
+
+				if ( !strErrMessage.equals("1") ) {
+					response.setContentType("text/html; charset=UTF-8");				 
+					PrintWriter out = response.getWriter();				 
+					out.println("<script>alert('" + strErrMessage + "');</script>");				 
+					out.flush();
+					mav.setViewName("home");
+				}
+				else {
+					response.setContentType("text/html; charset=UTF-8");				 
+					PrintWriter out = response.getWriter();				 
+					out.println("<script>alert('홀드해제가 완료되었습니다.');</script>");			 
+					out.flush();
+					mav.setViewName("home");
+				}
+				return mav;	
+			}
+		}
+		catch (Exception e) {
+			mav.setViewName("home");
+			e.printStackTrace();
+			return mav;	
+		} 
+	}
+	
+	public String save_sub_function(HttpServletRequest request, HttpServletResponse response, ArrayList<Object> holdContList, ArrayList<InAccountManageVO> virAcctList, SerialMainVO beanMain, CustVO vo, String prePayment) throws Exception{
+		
+		DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+		Date date = new Date();
+		
+		//데이터정리
+		beanMain.setSerial(FormatUtil.replace1(beanMain.getSerial(), "-", ""));
+		beanMain.setIssue_date(FormatUtil.replace1(beanMain.getIssue_date(), "-", ""));
+		beanMain.setTax_snum(FormatUtil.replace1(beanMain.getTax_snum(), "-", ""));
+		beanMain.setShip_tot(FormatUtil.getNum(beanMain.getShip_tot()));
+		beanMain.setShip_amt(FormatUtil.getNum(beanMain.getShip_amt()));
+		beanMain.setShip_vat(FormatUtil.getNum(beanMain.getShip_vat()));
+		beanMain.setShip_dep(FormatUtil.getNum(beanMain.getShip_dep()));
+
+		logger.info("save_sub_function beanMain : " + beanMain.toString());
+		
+		// 저장할 데이터 만들기...
+		List<SerialSubVO> lstDataSub = new ArrayList<SerialSubVO>();
+		String strErrMessage = "";
+		int validationCnt = 0;
+		
+		for(int i=0; i<holdContList.size(); i++) {
+			ShipperVO shipVO = (ShipperVO) holdContList.get(i);
+			SerialSubVO beanSub = new SerialSubVO();
+			
+			beanSub.setGubun("01");
+			beanSub.setShip_contno(FormatUtil.nvl(shipVO.getBie_ship_contno(), ""));
+			beanSub.setShip_point(FormatUtil.nvl(shipVO.getBie_ship_point(), " "));
+			beanSub.setShip_hold(FormatUtil.nvl(shipVO.getBie_ship_hold(), " "));
+			beanSub.setShip_seq(FormatUtil.nvl(shipVO.getBie_ship_seq(), " "));
+			beanSub.setShip_blno(FormatUtil.nvl(shipVO.getBie_ship_blno(), ""));
+			beanSub.setShip_refno(FormatUtil.nvl(shipVO.getBie_ship_refno(), " "));
+			beanSub.setShip_refno2(FormatUtil.nvl(shipVO.getBie_ship_refno2(), " "));
+			beanSub.setShip_personal(FormatUtil.nvl(shipVO.getBie_ship_personal(), " "));
+			beanSub.setShip_holddesc(FormatUtil.nvl(shipVO.getBie_ship_holddesc(), " "));
+			beanSub.setShip_vessel(FormatUtil.nvl(shipVO.getBie_ship_vessel(), " "));
+			beanSub.setShip_voyage(FormatUtil.nvl(shipVO.getBie_ship_voyage(), " "));
+			beanSub.setShip_operator(FormatUtil.nvl(shipVO.getBie_ship_operator(), " "));
+			beanSub.setShip_type(FormatUtil.nvl(shipVO.getBie_ship_type(), " "));
+			beanSub.setShip_count(FormatUtil.nvl(shipVO.getBie_ship_count(), " "));
+			beanSub.setShip_unit(FormatUtil.nvl(shipVO.getBie_ship_unit(), " "));
+			beanSub.setShip_qty(FormatUtil.nvl(shipVO.getBie_ship_qty(), " "));
+			beanSub.setShip_rate(FormatUtil.nvl(shipVO.getBie_ship_rate(), "0"));
+			beanSub.setShip_total(FormatUtil.nvl(shipVO.getBie_ship_total(), "0"));
+			beanSub.setShip_amount(FormatUtil.nvl(shipVO.getBie_ship_amount(), "0"));
+			beanSub.setShip_vat_amt(FormatUtil.nvl(shipVO.getBie_ship_vat(), "0"));
+			beanSub.setShip_driver_name(FormatUtil.nvl(shipVO.getBie_ship_driver_name(), " "));
+			beanSub.setShip_driver_hp(FormatUtil.nvl(shipVO.getBie_ship_driver_hp(), " "));
+			beanSub.setShip_truckno(FormatUtil.nvl(shipVO.getBie_ship_truckno(), " "));
+			beanSub.setShip_basedate(FormatUtil.nvl(shipVO.getBie_ship_basedate(), " "));
+			beanSub.setShip_limitdate(FormatUtil.nvl(shipVO.getBie_ship_limitdate(), " "));
+			beanSub.setShip_mrn(FormatUtil.nvl(shipVO.getBie_ship_mrn(), " "));
+			beanSub.setShip_invoiceno(FormatUtil.nvl(shipVO.getBie_ship_invoiceno(), " "));
+			beanSub.setShip_vesselname(FormatUtil.nvl(shipVO.getBie_ship_vesselname(), " "));
+			beanSub.setShip_arrive(FormatUtil.nvl(shipVO.getBie_ship_arrive(), " "));
+			beanSub.setShip_taxdate(FormatUtil.nvl(shipVO.getBie_ship_taxdate(), ""));
+			beanSub.setInuser(FormatUtil.nvl(vo.getCu_code(), " "));
+			beanSub.setIndate(FormatUtil.nvl(dateFormat.format(date), " "));
+			beanSub.setSale_class("20");
+
+			logger.info("*********** ERS 홀드해제 입력정보 *************");
+			logger.info("*********** 기준일 : " + beanSub.getShip_basedate());
+			logger.info("*********** 반출기한 : " + beanSub.getShip_limitdate());
+			logger.info("*********** 컨테이너번호 : " + beanSub.getShip_contno());
+			logger.info("*********** BL 번호 : " + beanSub.getShip_blno());
+			logger.info("*********** 홀드명 : " + beanSub.getShip_hold());
+			logger.info("*********** 총금액 : " + beanSub.getShip_total());
+			logger.info("*********** 공급가액 : " + beanSub.getShip_amount());
+			logger.info("*********** 부가세 : " + beanSub.getShip_vat_amt());
+			logger.info("*********** Invoice NO : " + beanSub.getShip_invoiceno());
+			logger.info("*********** 전표 NO : " + beanMain.getJun_no());
+			
+			// 조회한 컨테이너 정보로 발행된 계산서 내역이 있는지 조회
+			validationCnt = shipperService.searchCnt(beanSub.getShip_contno(), beanSub.getShip_point(), beanSub.getShip_hold(), beanSub.getShip_seq(), beanSub.getShip_blno()
+					, beanSub.getShip_vessel(), beanSub.getShip_voyage(), beanSub.getShip_operator(), beanSub.getShip_total(), beanSub.getShip_limitdate());
+
+			logger.info("validationCnt : " + validationCnt);
+			if(validationCnt > 0) {
+				logger.info("Already Processed Container Data Exist");
+				strErrMessage = "이미 처리된 컨테이너 정보가 있습니다.";
+				return strErrMessage;
+			}
+			else {
+				logger.info("Precessed Container Data not exist");
+				lstDataSub.add(beanSub);
+			}
+		}
+
+		//입금내역 데이터 정리
+		List<VirAcctVO> lstDatainaccount = new ArrayList<VirAcctVO>();
+		
+		for(int j=0; j<virAcctList.size(); j++) {
+			InAccountManageVO virAcctVO = virAcctList.get(j);
+			VirAcctVO beaninaccount = new VirAcctVO();
+			
+			beaninaccount.setIstcd(virAcctVO.getIstcd());
+			beaninaccount.setVir_acctno(virAcctVO.getVir_acctno());
+			beaninaccount.setTran_dd(virAcctVO.getTran_dd());
+			beaninaccount.setTran_hh(virAcctVO.getTran_hh());
+			beaninaccount.setVatrsno(virAcctVO.getVatrsno());
+			beaninaccount.setVaxclmthcd(virAcctVO.getVaxclmthcd());
+			beaninaccount.setProcess(virAcctVO.getProcess());
+			beaninaccount.setVatramt(virAcctVO.getIncom_amount());
+			
+			lstDatainaccount.add(beaninaccount);
+		}
+		
+		//세금계산서 데이터 생성
+		strErrMessage = serialService.save(beanMain, lstDataSub, lstDatainaccount);
+		
+		//전표데이터, 샌드빌계산서 데이터 생성 및 홀드해제 처리
+		if (strErrMessage.equals("1")){
+			strErrMessage = junpyoService.save(request, beanMain, lstDataSub, lstDatainaccount, prePayment);
+		}
+		else {
+			return strErrMessage;
+		}
+		
+		return strErrMessage;
+	}
+	
+	//JSON 일반납부 컨테이너 조회
+	@RequestMapping(value = "/SearchContActionJson.do", produces="application/json; charset=utf8")
+	@ResponseBody
+	public ResponseEntity<String> SearchContActionJson(HttpServletRequest request, HttpServletResponse response, ModelAndView mav) throws Exception {
+		
+		logger.info("SearchContActionJson.do");
+	    
+	    String bie_ship_contno_shr = (String) request.getParameter("bie_ship_contno_shr").toUpperCase().trim();
+	    String bie_ship_blno_shr = (String) request.getParameter("bie_ship_blno_shr").toUpperCase().trim();
+
+	    HttpHeaders responseHeaders = new HttpHeaders();
+	    JSONArray json = new JSONArray(); 
+	    
+	    try {
+	    	List<ShipperVO> list = shipperService.SearchContAction(bie_ship_contno_shr, bie_ship_blno_shr);
+		    
+	    	if(list.size() == 0) {
+		    	mav.addObject("message", "홀드해제할 컨테이너가 없습니다.");
+				mav.setViewName("home");
+		    }
+		    else {
+			    for(int i=0; i<list.size(); i++) {
+			    	ShipperVO vo = list.get(i);
+			    	logger.info(vo.toString());
+			    	
+			    	HashMap<String, String> hm = new HashMap<String, String>();
+			    	hm.put("bie_ship_contno", FormatUtil.nvl(vo.getBie_ship_contno(), " "));
+			    	hm.put("bie_ship_point", FormatUtil.nvl(vo.getBie_ship_point(), " "));    
+			    	hm.put("bie_ship_hold", FormatUtil.nvl(vo.getBie_ship_hold(), " "));      
+			    	hm.put("bie_ship_seq", FormatUtil.nvl(vo.getBie_ship_seq(), " "));       
+			    	hm.put("bie_ship_blno", FormatUtil.nvl(vo.getBie_ship_blno(), " "));      
+			    	hm.put("bie_ship_refno", FormatUtil.nvl(vo.getBie_ship_refno(), " "));     
+			    	hm.put("bie_ship_refno2", FormatUtil.nvl(vo.getBie_ship_refno2(), " "));    
+			    	hm.put("bie_ship_personal", FormatUtil.nvl(vo.getBie_ship_personal(), " "));  
+			    	hm.put("bie_ship_holddesc", FormatUtil.nvl(vo.getBie_ship_holddesc(), " "));  
+			    	hm.put("bie_ship_vessel", FormatUtil.nvl(vo.getBie_ship_vessel(), " "));    
+			    	hm.put("bie_ship_voyage", FormatUtil.nvl(vo.getBie_ship_voyage(), " "));    
+			    	hm.put("bie_ship_operator", FormatUtil.nvl(vo.getBie_ship_operator(), " "));  
+			    	hm.put("bie_ship_type", FormatUtil.nvl(vo.getBie_ship_type(), " "));      
+			    	hm.put("bie_ship_count", FormatUtil.nvl(vo.getBie_ship_count(), " "));     
+			    	hm.put("bie_ship_unit", FormatUtil.nvl(vo.getBie_ship_unit(), " "));      
+			    	hm.put("bie_ship_qty", FormatUtil.nvl(vo.getBie_ship_qty(), " "));       
+			    	hm.put("bie_ship_rate", FormatUtil.nvl(vo.getBie_ship_rate(), " "));      
+			    	hm.put("bie_ship_total", FormatUtil.nvl(vo.getBie_ship_total(), " "));     
+			    	hm.put("bie_ship_amount", FormatUtil.nvl(vo.getBie_ship_amount(), " "));    
+			    	hm.put("bie_ship_vat", FormatUtil.nvl(vo.getBie_ship_vat(), " "));       
+			    	hm.put("bie_ship_payment", FormatUtil.nvl(vo.getBie_ship_payment(), " "));   
+			    	hm.put("bie_ship_driver_name", FormatUtil.nvl(vo.getBie_ship_driver_name(), " "));
+			    	hm.put("bie_ship_driver_hp", FormatUtil.nvl(vo.getBie_ship_driver_hp(), " ")); 
+			    	hm.put("bie_ship_truckno", FormatUtil.nvl(vo.getBie_ship_truckno(), " "));   
+			    	hm.put("bie_ship_basedate", FormatUtil.nvl(vo.getBie_ship_basedate(), " "));  
+			    	hm.put("bie_ship_limitdate", FormatUtil.nvl(vo.getBie_ship_limitdate(), " ")); 
+			    	hm.put("bie_ship_tran_date", FormatUtil.nvl(vo.getBie_ship_tran_date(), " ")); 
+			    	hm.put("bie_ship_tran_time", FormatUtil.nvl(vo.getBie_ship_tran_time(), " ")); 
+			    	hm.put("bie_ship_user", FormatUtil.nvl(vo.getBie_ship_user(), " "));      
+			    	hm.put("bie_ship_erpconfirm", FormatUtil.nvl(vo.getBie_ship_erpconfirm(), " "));
+			    	hm.put("bie_ship_taxdate", FormatUtil.nvl(vo.getBie_ship_tran_date(), " "));   
+			    	hm.put("bie_ship_mrn", FormatUtil.nvl(vo.getBie_ship_mrn(), " "));       
+			    	hm.put("bie_ship_invoiceno", FormatUtil.nvl(vo.getBie_ship_invoiceno(), " ")); 
+			    	hm.put("bie_ship_vesselname", FormatUtil.nvl(vo.getBie_ship_vesselname(), " "));
+			    	hm.put("bie_ship_arrive", FormatUtil.nvl(vo.getBie_ship_arrive(), " "));    
+			    	hm.put("bie_ship_remark", FormatUtil.nvl(vo.getBie_ship_remark(), " "));    
+			    	hm.put("bie_ship_flag", FormatUtil.nvl(vo.getBie_ship_flag(), " "));      
+			    	hm.put("bie_ship_countdate", FormatUtil.nvl(vo.getBie_ship_countdate(), " ")); 
+			    	hm.put("bie_ship_oldamount", FormatUtil.nvl(vo.getBie_ship_oldamount(), " ")); 
+			    	hm.put("bie_ship_order", FormatUtil.nvl(vo.getBie_ship_order(), " "));
+			    	
+			    	json.add(hm);
+			    }  	
+		    }
+			
+		} catch (Exception e) {
+			mav.setViewName("home");
+			e.printStackTrace();
+		}
+	    
+    	return new ResponseEntity<String>(json.toString(), responseHeaders, HttpStatus.CREATED);
+	}
+
+	//JSON 사전납부 컨테이너 조회
+	@RequestMapping(value = "/SearchPreContActionJson.do", produces="application/json; charset=utf8")
+	@ResponseBody
+	public ResponseEntity<String> SearchPreContActionJson(HttpServletRequest request, HttpServletResponse response, ModelAndView mav) throws Exception {
+
+	    logger.info("SearchPreContActionJson.do");
+
+	    String demurrage = (String) request.getParameter("bie_ship_symd_shr");	    
+	    String bie_ship_contno_shr = (String) request.getParameter("bie_ship_contno_shr").toUpperCase().trim();
+	    String bie_ship_blno_shr = (String) request.getParameter("bie_ship_blno_shr").toUpperCase().trim();
+
+	    HttpHeaders responseHeaders = new HttpHeaders();
+	    JSONArray json = new JSONArray(); 
+	    
+	    try {
+	    	if(bie_ship_contno_shr.length() == 0) {
+	    		bie_ship_contno_shr = "NULL";
+	    	}
+	    	else {
+	    		bie_ship_contno_shr = bie_ship_contno_shr.replaceAll("-", ""); 
+	    	}
+	    	if(bie_ship_blno_shr.length() == 0) {
+	    		bie_ship_blno_shr = "NULL";
+	    	}
+	    	else {
+	    		bie_ship_blno_shr = bie_ship_blno_shr.replaceAll("-", "");  
+	    	}
+	    	logger.info("demurrage : " + demurrage);
+	    	demurrage = demurrage.replaceAll("-", "");	    	
+	    	
+		    logger.info("preSearch demurrage : " + demurrage + " / bie_ship_contno_shr : " + bie_ship_contno_shr + " / bie_ship_blno_shr : " + bie_ship_blno_shr);
+		    // 사전납부 컨테이너 데이터 생성
+		    shipperService.SearchPreContAction(bie_ship_contno_shr, bie_ship_blno_shr, demurrage);
+		    // 사전납부 컨테이너 데이터 조회
+		    ArrayList<ShipperVO> list = shipperService.Search_PrePaymentCont_Select(FormatUtil.nvl(bie_ship_contno_shr, ""), FormatUtil.nvl(bie_ship_blno_shr, ""));
+	    	logger.info("list size : " + list.size());
+		    
+		    if(list.size() != 0) {
+			    for(int i=0; i<list.size(); i++) {
+			    	ShipperVO vo = list.get(i);
+			    	logger.info(vo.toString());
+
+			    	HashMap<String, String> hm = new HashMap<String, String>();
+			    	hm.put("bie_ship_contno", FormatUtil.nvl(vo.getBie_ship_contno(), " "));
+			    	hm.put("bie_ship_point", FormatUtil.nvl(vo.getBie_ship_point(), " "));
+			    	hm.put("bie_ship_hold", FormatUtil.nvl(vo.getBie_ship_hold(), " "));
+			    	hm.put("bie_ship_seq", FormatUtil.nvl(vo.getBie_ship_seq(), " "));
+			    	hm.put("bie_ship_blno", FormatUtil.nvl(vo.getBie_ship_blno(), " "));
+			    	hm.put("bie_ship_refno", FormatUtil.nvl(vo.getBie_ship_refno(), " "));
+			    	hm.put("bie_ship_refno2", FormatUtil.nvl(vo.getBie_ship_refno2(), " "));
+			    	hm.put("bie_ship_personal", FormatUtil.nvl(vo.getBie_ship_personal(), " "));
+			    	hm.put("bie_ship_holddesc", FormatUtil.nvl(vo.getBie_ship_holddesc(), " "));
+			    	hm.put("bie_ship_vessel", FormatUtil.nvl(vo.getBie_ship_vessel(), " "));
+			    	hm.put("bie_ship_voyage", FormatUtil.nvl(vo.getBie_ship_voyage(), " "));
+			    	hm.put("bie_ship_operator", FormatUtil.nvl(vo.getBie_ship_operator(), " "));
+			    	hm.put("bie_ship_type", FormatUtil.nvl(vo.getBie_ship_type(), " "));
+			    	hm.put("bie_ship_count", FormatUtil.nvl(vo.getBie_ship_count(), " "));
+			    	hm.put("bie_ship_unit", FormatUtil.nvl(vo.getBie_ship_unit(), " "));
+			    	hm.put("bie_ship_qty", FormatUtil.nvl(vo.getBie_ship_qty(), " "));
+			    	hm.put("bie_ship_rate", FormatUtil.nvl(vo.getBie_ship_rate(), " "));
+			    	hm.put("bie_ship_total", FormatUtil.nvl(vo.getBie_ship_total(), " "));
+			    	hm.put("bie_ship_amount", FormatUtil.nvl(vo.getBie_ship_amount(), " "));
+			    	hm.put("bie_ship_vat", FormatUtil.nvl(vo.getBie_ship_vat(), " "));
+			    	hm.put("bie_ship_payment", FormatUtil.nvl(vo.getBie_ship_vat(), " "));
+			    	hm.put("bie_ship_driver_name", FormatUtil.nvl(vo.getBie_ship_driver_name(), " "));
+			    	hm.put("bie_ship_driver_hp", FormatUtil.nvl(vo.getBie_ship_driver_hp(), " "));
+			    	hm.put("bie_ship_truckno", FormatUtil.nvl(vo.getBie_ship_truckno(), " "));
+			    	hm.put("bie_ship_basedate", FormatUtil.nvl(vo.getBie_ship_basedate(), " "));
+			    	hm.put("bie_ship_limitdate", FormatUtil.nvl(vo.getBie_ship_limitdate(), " "));
+			    	hm.put("bie_ship_tran_date", FormatUtil.nvl(vo.getBie_ship_tran_date(), " "));
+			    	hm.put("bie_ship_tran_time", FormatUtil.nvl(vo.getBie_ship_tran_time(), " "));
+			    	hm.put("bie_ship_user", FormatUtil.nvl(vo.getBie_ship_user(), " "));
+			    	hm.put("bie_ship_erpconfirm", FormatUtil.nvl(vo.getBie_ship_erpconfirm(), " "));
+			    	hm.put("bie_ship_taxdate", FormatUtil.nvl(vo.getBie_ship_taxdate(), " "));
+			    	hm.put("bie_ship_mrn", FormatUtil.nvl(vo.getBie_ship_mrn(), " "));
+			    	hm.put("bie_ship_invoiceno", FormatUtil.nvl(vo.getBie_ship_invoiceno(), " "));
+			    	hm.put("bie_ship_vesselname", FormatUtil.nvl(vo.getBie_ship_vessel(), " "));
+			    	hm.put("bie_ship_arrive", FormatUtil.nvl(vo.getBie_ship_arrive(), " "));
+			    	hm.put("bie_ship_remark", FormatUtil.nvl(vo.getBie_ship_remark(), " "));
+			    	hm.put("bie_ship_flag", FormatUtil.nvl(vo.getBie_ship_flag(), " "));
+			    	hm.put("bie_ship_countdate", FormatUtil.nvl(vo.getBie_ship_countdate(), " "));
+			    	hm.put("bie_ship_oldamount", FormatUtil.nvl(vo.getBie_ship_oldamount(), " "));
+			    	hm.put("bie_ship_order", FormatUtil.nvl(vo.getBie_ship_order(), " "));
+			    	hm.put("bie_ship_demurrage", FormatUtil.nvl(vo.getBie_ship_demurrage(), " "));
+			    	hm.put("bie_ship_pintime", FormatUtil.nvl(vo.getBie_ship_pintime(), " "));  
+			    	
+			    	json.add(hm);
+			    }
+			    
+		    	mav.addObject("list", list);
+				mav.setViewName("home");
+		    }
+		    else {
+		    	mav.addObject("list", list);
+		    	mav.setViewName("home");
+		    }
+			
+		} catch (Exception e) {
+			mav.setViewName("home");
+			e.printStackTrace();
+		}
+
+    	return new ResponseEntity<String>(json.toString(), responseHeaders, HttpStatus.CREATED);
+	}
+	
+	//JSon 가상계좌 입금내역 조회
+	@RequestMapping(value = "/SearchVirAccountJson.do", produces="application/json; charset=utf8")
+	@ResponseBody
+	public ResponseEntity<String> SearchVirAccount(HttpServletRequest request, HttpServletResponse response, ModelAndView mav) throws Exception {
+
+		logger.info("SearchVirAccount_Json : " + request.getRequestedSessionId());
+	    
+	    String cu_code = (String) request.getParameter("cu_code");
+	    String cma_account = (String) request.getParameter("cma_account");
+		logger.info("cma_account : " + cma_account + " / cu_code : " + cu_code);
+	    HttpHeaders responseHeaders = new HttpHeaders();
+	    JSONArray json = new JSONArray(); 
+	    
+	    try {
+	    	ArrayList<InAccountManageVO> list = shipperService.SearchVirAccountJson(cu_code, cma_account);
+		    
+		    if(list.size() == 0) {
+		    	mav.addObject("message", "입금내역이 없습니다.");
+				mav.setViewName("home");
+		    }
+		    else {
+			    for(int i=0; i<list.size(); i++) {
+			    	InAccountManageVO vo = list.get(i);
+			    	logger.info(vo.toString());
+			    	
+			    	HashMap<String, String> hm = new HashMap<String, String>();
+			    	hm.put("vir_acctno", FormatUtil.nvl(vo.getVir_acctno(), " "));
+			    	hm.put("tran_dd", FormatUtil.nvl(vo.getTran_dd(), " "));
+			    	hm.put("tran_hh", FormatUtil.nvl(vo.getTran_hh(), " "));
+			    	hm.put("incom_amount", FormatUtil.nvl(vo.getIncom_amount(), " "));
+			    	hm.put("rndclrnm", FormatUtil.nvl(vo.getRndclrnm(), " "));
+			    	
+			    	hm.put("except", FormatUtil.nvl(vo.getExcept(), " "));
+			    	hm.put("remark", FormatUtil.nvl(vo.getRemark(), " "));
+			    	hm.put("istcd", FormatUtil.nvl(vo.getIstcd(), " "));
+			    	hm.put("vatrsno", FormatUtil.nvl(vo.getVatrsno(), " "));
+			    	hm.put("vaxclmthcd", FormatUtil.nvl(vo.getVaxclmthcd(), " "));
+			    	
+			    	hm.put("outcom_amount", FormatUtil.nvl(vo.getIncom_amount(), " "));
+			    	hm.put("process", FormatUtil.nvl(vo.getProcess(), " "));
+			    	
+			    	json.add(hm);
+			    }  	
+		    }
+		} catch (Exception e) {
+			mav.setViewName("home");
+			e.printStackTrace();
+		}
+
+    	return new ResponseEntity<String>(json.toString(), responseHeaders, HttpStatus.CREATED);
+	}
+	
+	//컨테이너 비용처리 메뉴 이동
+	@RequestMapping(value = "/taxProcess.do")
+	public ModelAndView taxProcess(HttpServletRequest request, HttpServletResponse response, ModelAndView mav) throws Exception {
+
+	    logger.info("taxProcess.do");
+		HttpSession session =  request.getSession();
+		CustVO vo = (CustVO) session.getAttribute("userInfo");
+	    String message = "";
+		
+		if(vo == null) {
+			logger.info("로그인 세션이 끊어졌습니다.");
+	    	mav.addObject("message", "로그인 세션이 끊어졌습니다.");
+			mav.setViewName("index");
+			
+    		message = "로그인 세션이 끊어졌습니다.";
+    		FormatUtil.alertFunction(response, message);
+		} 
+		else {
+			logger.info("로그인 사용자 정보 : " + vo.toString());
+			mav.addObject("userInfo", vo);
+	    	mav.setViewName("home");
+		}
+		
+		return mav;
+	}
+				
+	//세금계산서 메뉴 이동
+	@RequestMapping(value = "/taxProcessList.do")
+	public ModelAndView taxProcessList(HttpServletRequest request, HttpServletResponse response, ModelAndView mav) throws Exception {
+	    logger.info("taxProcessList1");
+
+		HttpSession session =  request.getSession();
+		CustVO vo = (CustVO) session.getAttribute("userInfo");
+	    String message = "";		
+
+		if(vo == null) {
+			logger.info("로그인 세션이 끊어졌습니다.");
+	    	mav.addObject("message", "로그인 세션이 끊어졌습니다.");
+			mav.setViewName("index");
+			
+    		message = "로그인 세션이 끊어졌습니다.";
+    		FormatUtil.alertFunction(response, message);
+		}
+		else {			
+			logger.info("로그인 사용자 정보 : " + vo.toString());
+			mav.addObject("userInfo", vo);
+	    	mav.setViewName("taxProcessList");
+		}
+		
+		return mav;
+	}
+
+	//거래명세서 팝업
+	@RequestMapping(value = "/billPrintPopup.do")
+	public ModelAndView taxBill_Print(HttpServletRequest request, HttpServletResponse response, ModelAndView mav) throws Exception {
+	    logger.info("billPrintPopup.do");
+
+		HttpSession session =  request.getSession();
+		CustVO vo = (CustVO) session.getAttribute("userInfo");
+		ArrayList<CompanyVO> companyInfo = taxProcessService.getCompanyInfo();
+	    String message = "";
+		
+		if(vo == null) {
+			logger.info("로그인 세션이 끊어졌습니다.");
+	    	mav.addObject("message", "로그인 세션이 끊어졌습니다.");
+			mav.setViewName("index");
+			
+    		message = "로그인 세션이 끊어졌습니다.";
+    		FormatUtil.alertFunction(response, message);
+		}
+		else {
+			// 화면에서 넘어온 JSON 컨테이너 정보 파싱처리  
+			String holdContData = (String) request.getParameter("holdContData");
+			JsonParser jsonParser = new JsonParser();
+			JsonArray holdContDataArray = (JsonArray) jsonParser.parse(holdContData);
+			
+			mav.addObject("userInfo", vo);
+			mav.addObject("companyInfo", companyInfo);
+			mav.addObject("holdContDataArray", holdContDataArray);
+	    	mav.setViewName("billPrintPopup");
+		}
+		 
+		return mav;
+	}	
+}

@@ -1,0 +1,393 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 맵핑될 DAO 인터페이스의 Full name 을 줍니다. -->
+<mapper namespace="kr.co.hjitERS.service.dao.JunpyoDAO">
+
+	<!-- id 속성은 DAO 의 메소드와 같아야 한다. 여기의 loginVO 는 mybatis-confg.xml 에 Alias 되어 있습니다. -->
+	<select id="save_junpyo" parameterType="String" statementType="CALLABLE">
+		{ 
+			CALL SP_SHIPPER_JUNPYO_SAVE_ERS(
+				#{gubun, mode=IN, jdbcType=VARCHAR}
+				, #{serial, mode=IN, jdbcType=VARCHAR}
+				, #{sale_class, mode=IN, jdbcType=VARCHAR}
+				, #{cu_code, mode=IN, jdbcType=VARCHAR}
+			)
+		}
+	</select>
+	
+	<!-- id 속성은 DAO 의 메소드와 같아야 한다. 여기의 loginVO 는 mybatis-confg.xml 에 Alias 되어 있습니다. -->
+	<select id="make_injunpyo" parameterType="String" resultType="String">
+		SELECT 
+			jun_no 
+		FROM 
+			s_shipper_main 
+		WHERE 
+			gubun = '01' 
+    		and serial = ${serial}
+    		and sale_class = '20'
+	</select>	
+
+	<!-- id 속성은 DAO 의 메소드와 같아야 한다. 여기의 loginVO 는 mybatis-confg.xml 에 Alias 되어 있습니다. -->
+	<select id="make_sangJunpyo" parameterType="String" resultType="String">
+		SELECT 
+			NVL(SUBSTR(MAX(JUN_NO), 1, 8) || LPAD(TO_NUMBER(SUBSTR(MAX(JUN_NO), 9, 4)) + 1 ,4, '0'), TO_CHAR(SYSDATE, 'YYYYMMDD')) AS JUN_NO 
+		FROM 
+			A_JUNPYO 
+		WHERE 
+			JUN_GUBUN = '01' 
+    		AND JUN_NO LIKE '' || #{issue_date} || '%'
+	</select>	
+    
+	<!-- id 속성은 DAO 의 메소드와 같아야 한다. 여기의 loginVO 는 mybatis-confg.xml 에 Alias 되어 있습니다. -->
+	<select id="make_inJun_wno" parameterType="String" resultType="String">
+		SELECT 
+			NVL(SUBSTR(MAX(JUN_WNO), 1, 8)  || LPAD(TO_NUMBER(SUBSTR(MAX(JUN_WNO), 9, 4)) + 1 ,4, '0'), TO_CHAR(SYSDATE, 'YYYYMMDD')) AS JUN_WNO 
+		FROM 
+			A_JUNPYO 
+		WHERE 
+			JUN_GUBUN = '01' 
+    		AND JUN_NO LIKE '' || #{issue_date} || '%'
+	</select>	
+	
+	<!-- id 속성은 DAO 의 메소드와 같아야 한다. 여기의 loginVO 는 mybatis-confg.xml 에 Alias 되어 있습니다. -->
+	<select id="make_depoData" parameterType="String" resultType="kr.co.hjitERS.vo.DepoVO">
+		SELECT 
+		 	DEPO_CLASS,DEPO_CD,DEPO_CONTRACD,DEPO_BANKCD,DEPO_ACCOUNT  
+		FROM 
+			A_DEPOSIT_GCODE 
+		WHERE 
+			GUBUN = '01' 
+    		AND DEPO_YYYY = #{issue_date}
+    		AND DEPO_CLASS = #{deposit_class}
+	</select>	
+	
+	<!-- id 속성은 DAO 의 메소드와 같아야 한다. 여기의 loginVO 는 mybatis-confg.xml 에 Alias 되어 있습니다. -->
+	<insert id="insertInJunpyo" parameterType="junpyoVO">
+		<selectKey keyProperty="rtn" resultType="java.lang.Integer"> 
+			select 1 from dual
+		</selectKey> 
+	
+        INSERT INTO A_JUNPYO ( 
+      		JUN_GUBUN, JUN_NO, JUN_GNO, JUN_CD1, JUN_CD2 
+      		, JUN_CD2NAME, JUN_CDGUBUN, JUN_CHAAK, JUN_DAEAK, JUN_WDATE 
+      		, JUN_WNO, JUN_WNAME, JUN_JUKYO, JUN_SBUSOR, JUN_BRANCH 
+      		, JUN_INBUSOR, JUN_INBUSORNM, JUN_INUSER, JUN_INUSERNM, JUN_INDATE 
+      		, JUN_SORT, JUN_BANK, JUN_ACCOUNT 
+      	) 
+      	SELECT 
+      		GUBUN, JUN_NO, JUN_GNO, B.GC_CD1, JUN_CD2 
+      		, B.GC_NAME, B.GC_CDGUBUN, JUN_CHAAK, JUN_DAEAK, JUN_WDATE 
+      		, JUN_WNO, JUN_WNAME, JUN_JUKYO, JUN_SBUSOR, JUN_BRANCH 
+      		, JUN_INBUSOR, JUN_INBUSORNM, JUN_INUSER, JUN_INUSERNM, JUN_INDATE 
+      		, JUN_SORT, JUN_BANK, JUN_ACCOUNT 
+      	FROM ( SELECT 
+      			#{jun_gubun} AS GUBUN, #{jun_no} AS JUN_NO, #{jun_gno} AS JUN_GNO, #{depo_cd} AS JUN_CD2,
+      			' ' AS JUN_CD2NAME, ' ' AS JUN_CDGUBUN, #{jun_chaak} AS JUN_CHAAK, 0 AS JUN_DAEAK, #{jun_wdate} AS JUN_WDATE, #{jun_wno} AS JUN_WNO,
+      			'ERS' AS JUN_WNAME, ' ' AS JUN_JUKYO, #{jun_inbusor} AS JUN_SBUSOR, #{jun_branch} AS JUN_BRANCH,
+      			#{jun_inbusor} AS JUN_INBUSOR, #{jun_inbusornm} AS JUN_INBUSORNM, #{jun_inuser} AS JUN_INUSER, #{jun_inusernm} AS JUN_INUSERNM,
+      			TO_CHAR(SYSDATE, 'YYYYMMDD') AS JUN_INDATE, #{jun_sort} AS JUN_SORT, #{depo_bankcd} AS JUN_BANK,
+      			#{depo_account} AS JUN_ACCOUNT FROM DUAL ) A 
+      	LEFT OUTER JOIN A_G_CODE B ON A.GUBUN = B.GC_GUBUN 
+			AND  SUBSTR(A.JUN_NO,1,4) = B.GC_SYY 
+			AND  B.GC_CD2 = #{depo_cd}
+    </insert>
+    
+	<!-- id 속성은 DAO 의 메소드와 같아야 한다. 여기의 loginVO 는 mybatis-confg.xml 에 Alias 되어 있습니다. -->
+	<insert id="insertInJunpyo2" parameterType="junpyoVO">
+		<selectKey keyProperty="rtn" resultType="java.lang.Integer"> 
+			select 1 from dual
+		</selectKey> 
+	        INSERT INTO A_JUNPYO ( 
+              JUN_GUBUN, JUN_NO, JUN_GNO, JUN_CD1, JUN_CD2 
+            , JUN_CD2NAME, JUN_CDGUBUN, JUN_CHAAK, JUN_DAEAK, JUN_WDATE 
+            , JUN_WNO, JUN_WNAME, JUN_JUKYO, JUN_SBUSOR, JUN_BRANCH 
+            , JUN_INBUSOR, JUN_INBUSORNM, JUN_INUSER, JUN_INUSERNM, JUN_INDATE 
+            , JUN_SORT, JUN_SANGNO, JUN_SANGGNO, JUN_CUST 
+          ) 
+        	SELECT SUB.* FROM  (
+        		SELECT A.GUBUN, #{jun_no} as jun_no, #{jun_gno} as jun_gno, B.GC_CD1, #{depo_contracd} as jun_cd2 
+                 	, B.GC_NAME, B.GC_CDGUBUN, 0 as jun_chaak, #{jun_chaak} as jun_daeak, #{jun_wdate} as jun_wdate 
+                 	, #{jun_wno} as jun_wno, 'ERS' as jun_wname, '화주입금' || A.SERIAL as jun_jukyo, #{jun_inbusor} as jun_sbusor, #{jun_branch} as jun_branch 
+         			, #{jun_inbusor} as jun_inbusor, #{jun_inbusornm} as jun_inbusornm, #{jun_inuser} as jun_inuser, #{jun_inusernm} as jun_inusernm
+         			, TO_CHAR(SYSDATE, 'YYYYMMDD') as jun_indate, #{jun_sort} as jun_sort, A.JUN_NO AS JUN_SANGNO, '1' AS JUN_SANGGNO, #{jun_cust} as jun_cust 
+				FROM S_SHIPPER_MAIN A
+ 				LEFT OUTER JOIN A_G_CODE B 
+        			ON A.GUBUN = B.GC_GUBUN 
+       			AND SUBSTR(${jun_no},0,4) = B.GC_SYY 
+       			AND #{depo_contracd} = B.GC_CD2 
+				UNION ALL 
+				SELECT A.GUBUN, #{jun_no} as jun_no, #{jun_gno} as jun_gno,B.GC_CD1, #{depo_cd} as jun_cd2 
+         			, B.GC_NAME, B.GC_CDGUBUN, 0 as jun_chaak, #{jun_chaak} as jun_daeak, #{jun_wdate} as jun_wdate 
+         			, #{jun_wno} as jun_wno, 'ERS' as jun_wname, '화주입금' || A.JUN_NO as jun_jukyo, #{jun_inbusor} as jun_sbusor, #{jun_branch} as jun_branch 
+         			, #{jun_inbusor} as jun_inbusor, #{jun_inbusornm} as jun_inbusornm, #{jun_inuser} as jun_inuser, #{jun_inusernm} as jun_inusernm, TO_CHAR(SYSDATE, 'YYYYMMDD') as jun_indate 
+         			, #{jun_sort} as jun_sort, A.JUN_NO AS JUN_SANGNO, '1' AS JUN_SANGGNO, #{jun_cust} as jun_cust
+  				FROM s_basic_bond A
+ 				LEFT OUTER JOIN A_G_CODE B 
+        			ON A.GUBUN = B.GC_GUBUN 
+       			AND SUBSTR(${jun_no},0,4) = B.GC_SYY 
+       			AND #{depo_contracd} = B.GC_CD2  
+  				WHERE A.gubun = #{jun_gubun} 
+    				AND A.cu_code = #{jun_cust} 
+    				AND A.bond_class = '20') SUB
+       				WHERE SUB.GUBUN = #{jun_gubun}
+       				AND SUB.JUN_SANGNO = #{sang_jun_no}
+    </insert>
+    
+    <insert id="insertMibul" parameterType="mibulVO">
+		<selectKey keyProperty="rtn" resultType="java.lang.Integer"> 
+			select 1 from dual
+		</selectKey> 
+	
+        INSERT INTO A_SB_MIBUL 
+			(SB_GUBUN, SB_JUNNO, SB_GNO, SB_BRANCH, SB_SGUBUN, SB_CD2, 
+				SB_KCD, SB_CDGUBUN, SB_CHECK, SB_OAMT, SB_CJUNNO, 
+				SB_CGNO, SB_RAMT, SB_WDATE, SB_JUKYO, INUSER, INDATE) 
+		SELECT SUB. * 
+		FROM (
+			SELECT 
+				A.GUBUN,#{jun_no},#{jun_gno},#{jun_branch},0,#{depo_contracd} 
+				,#{jun_inuser},'0','1',A.SHIP_TOT, A.JUN_NO 
+				,1, ${jun_chaak}, #{jun_wdate}, ' ' 
+				,'ERS',TO_CHAR(SYSDATE, 'YYYYMMDD') AS INDATE 
+  			FROM  S_SHIPPER_MAIN A 
+			UNION ALL 
+			SELECT 
+				A.GUBUN,#{jun_no},#{jun_gno},#{jun_branch},0,#{depo_contracd} 
+				,#{jun_inuser},'0','1',A.BOND_AMT, A.JUN_NO 
+				,1, ${jun_chaak}, #{jun_wdate}, ' ' 
+				,'ERS',TO_CHAR(SYSDATE, 'YYYYMMDD') AS INDATE 
+  			FROM  S_BASIC_BOND A 
+  			WHERE A.GUBUN = '01' 
+    			AND A.CU_CODE = #{jun_inuser} 
+    			AND A.BOND_CLASS = '20') SUB
+  		WHERE SUB.GUBUN = '01' 
+  			AND SUB.JUN_NO = #{sang_jun_no}
+    </insert>
+    
+    <insert id="insertSInJunpyo" parameterType="mibulVO">
+		<selectKey keyProperty="rtn" resultType="java.lang.Integer"> 
+			select 1 from dual
+		</selectKey> 
+	
+        INSERT INTO S_IN_JUNPYO 
+			(GUBUN, IN_JUN_NO, JUN_NO, INUSER, INDATE) 
+		SELECT SUB. * 
+		FROM (
+			SELECT '01' AS GUBUN,#{jun_no} AS IN_JUN_NO, A.JUN_NO, 'ERS', TO_CHAR(SYSDATE, 'YYYYMMDD') AS INDATE
+			FROM S_SHIPPER_MAIN A 
+			UNION ALL 
+			SELECT '01'  AS GUBUN,#{jun_no} AS IN_JUN_NO, A.JUN_NO, 'ERS', TO_CHAR(SYSDATE, 'YYYYMMDD') AS INDATE
+			FROM S_BASIC_BOND A 
+  		WHERE A.GUBUN = '01' 
+    		AND A.CU_CODE = #{jun_inuser} 
+    		AND A.BOND_CLASS = '20') SUB
+  		WHERE SUB.GUBUN = '01' 
+  			AND SUB.JUN_NO = #{sang_jun_no}
+    </insert>
+	
+	<!-- id 속성은 DAO 의 메소드와 같아야 한다. 여기의 loginVO 는 mybatis-confg.xml 에 Alias 되어 있습니다. -->
+	<insert id="To_greenBillTB" parameterType="kr.co.hjitERS.vo.SerialMainVO">
+		<selectKey keyProperty="rtn" resultType="java.lang.Integer"> 
+			select 1 from dual
+		</selectKey> 
+	
+        INSERT INTO S_SHIPPER_MAIN
+        	(GUBUN, SERIAL, SALE_CLASS, ISSUE_DATE, CU_CODE, TAKE_USER
+        	, TAKE_USERMAIL, TAX_SNUM, PROC_TYPE, SHIP_CUSTOMS, SHIP_TOT
+        	, SHIP_AMT, SHIP_VAT, SHIP_DEP, INUSER, INDATE)
+		VALUES 
+		(${gubun}, ${serial}, ${sale_class}, ${issue_date}, ${cu_code}, ${take_user}
+		, ${take_usermail}, ${tax_snum}, ${proc_type}, ${ship_customs}, ${ship_tot}
+		, ${ship_amt}, ${ship_vat}, ${ship_dep}, ${inuser}, ${indate}
+		) 
+    </insert>
+    
+	<!-- id 속성은 DAO 의 메소드와 같아야 한다. 여기의 loginVO 는 mybatis-confg.xml 에 Alias 되어 있습니다. -->
+	<select id="searchSerialJunno" resultType="hashmap" parameterType="String">
+		SELECT
+			jun_no
+		FROM
+			s_shipper_main
+		WHERE 
+			serial = ${serial}
+    </select>
+    
+	<!-- id 속성은 DAO 의 메소드와 같아야 한다. 여기의 loginVO 는 mybatis-confg.xml 에 Alias 되어 있습니다. -->
+	<select id="searchBillClass" resultType="hashmap" parameterType="String">
+		SELECT
+			CASE BILL_CLASS WHEN '0' THEN '2' ELSE '1' END AS BILL_CLASS
+			, CASE TAX_CLASS WHEN '0' THEN '1' WHEN '1' THEN '0' END AS TAX_CLASS
+		FROM
+			S_SHIPPER_MAIN
+		WHERE 
+			SERIAL = ${serial}
+    </select>
+    
+	<!-- id 속성은 DAO 의 메소드와 같아야 한다. 여기의 loginVO 는 mybatis-confg.xml 에 Alias 되어 있습니다. -->
+	<select id="searchVatInfo" resultType="hashmap" parameterType="String">
+		SELECT
+			C.CO_SANO, C.CO_SANAME, C.CO_MASTER, C.CO_UPTAE, C.CO_UPJONG, C.CO_JUSO, C.CO_JUSO AS CO_JUSO2, A.*,B.*,D.*
+		FROM
+			A_SB_VAT A
+		LEFT OUTER JOIN A_CALIN B
+			ON A.SBVT_GUBUN = B.GUBUN
+			AND A.SBVT_CODE = B.JUNPYO
+			AND A.SBVT_GNO = B.GNO
+		LEFT OUTER JOIN C_COMPANY C
+			ON A.SBVT_GUBUN = C.CO_GUBUN
+		LEFT OUTER JOIN C_CUST D
+			ON A.SBVT_GUBUN = D.CU_GUBUN
+			AND A.SBVT_CUCODE = D.CU_CODE
+		WHERE A.SBVT_GUBUN = '01'
+			AND A.SBVT_CODE = ${junno}
+    </select>
+    
+	<!-- id 속성은 DAO 의 메소드와 같아야 한다. 여기의 loginVO 는 mybatis-confg.xml 에 Alias 되어 있습니다. -->
+	<select id="searchBillTransInfo" resultType="billTransItem" parameterType="String">
+		SELECT SAMT1 AS TAX,GAMT1 AS SUP,DANGA1 AS DANGA,SURYANG1 AS VLM,DANWI1 AS UNIT,BIGO1 AS REMARK  
+				,CASE WHEN LENGTHB(NVL(BOM1,' ')) > 40  
+    				THEN  
+    			CASE WHEN SUBSTRB(BOM1,0,INSTR(BOM1,'외') - 1) IS NOT NULL  
+      				THEN SUBSTRB(SUBSTRB(BOM1,0,INSTR(BOM1,'외') - 1),0,40 - LengthB(SubStrB(BOM1,INSTR(BOM1,'외')))) || SUBSTRB(BOM1,INSTR(BOM1,'외')) 
+      				ELSE SUBSTRB(BOM1,0,40) 
+      				END 
+    			ELSE 
+	      			BOM1 
+   				END AS OBJ
+		FROM A_CALIN
+		WHERE GUBUN = '01'
+			AND JUNPYO = ${junno}
+			AND GNO = ${sbvt_gno} 
+			AND LENGTH(TRIM(GAMT1)) != 0 
+			AND (To_Number(TRIM(GAMT1)) > 0 or 0 > To_Number(TRIM(GAMT1))) 
+		UNION ALL
+		SELECT SAMT2,GAMT2,DANGA2,SURYANG2,DANWI2,BIGO2 
+			,CASE WHEN LENGTHB(NVL(BOM2,' ')) > 40  
+    			THEN  
+    		CASE WHEN SUBSTRB(BOM2,0,INSTR(BOM2,'외') - 1) IS NOT NULL  
+      			THEN SUBSTRB(SUBSTRB(BOM2,0,INSTR(BOM2,'외') - 1),0,40 - LengthB(SubStrB(BOM2,INSTR(BOM2,'외')))) || SUBSTRB(BOM2,INSTR(BOM2,'외')) 
+      		ELSE SUBSTRB(BOM2,0,40) 
+      			END 
+    		ELSE 
+      			BOM2 
+   			END AS BOM 
+		FROM A_CALIN
+		WHERE GUBUN = '01'
+			AND JUNPYO = ${junno}
+			AND GNO = ${sbvt_gno} 
+			AND LENGTH(TRIM(GAMT2)) != 0 
+			AND (To_Number(TRIM(GAMT2)) > 0 or 0 > To_Number(TRIM(GAMT2))) 
+		UNION ALL
+		SELECT SAMT3,GAMT3,DANGA3,SURYANG3,DANWI3 ,BIGO3
+			,CASE WHEN LENGTHB(NVL(BOM3,' ')) > 40  
+    		THEN  
+    		CASE WHEN SUBSTRB(BOM3,0,INSTR(BOM3,'외') - 1) IS NOT NULL  
+      			THEN SUBSTRB(SUBSTRB(BOM3,0,INSTR(BOM3,'외') - 1),0,40 - LengthB(SubStrB(BOM3,INSTR(BOM3,'외')))) || SUBSTRB(BOM3,INSTR(BOM3,'외')) 
+      		ELSE SUBSTRB(BOM3,0,40) 
+      			END 
+    		ELSE 
+      			BOM3 
+   			END AS BOM 
+		FROM A_CALIN
+		WHERE GUBUN = '01'
+			AND JUNPYO = ${junno}
+			AND GNO = ${sbvt_gno} 
+			AND LENGTH(TRIM(GAMT3)) != 0 
+			AND (To_Number(TRIM(GAMT3)) > 0 or 0 >To_Number(TRIM(GAMT3))) 
+		UNION ALL
+		SELECT SAMT4,GAMT4,DANGA4,SURYANG4,DANWI4 AS BOM ,BIGO4
+			,CASE WHEN LENGTHB(NVL(BOM4,' ')) > 40  
+    			THEN  
+    		CASE WHEN SUBSTRB(BOM4,0,INSTR(BOM4,'외') - 1) IS NOT NULL  
+      			THEN SUBSTRB(SUBSTRB(BOM4,0,INSTR(BOM4,'외') - 1),0,40 - LengthB(SubStrB(BOM4,INSTR(BOM4,'외')))) || SUBSTRB(BOM4,INSTR(BOM4,'외')) 
+      		ELSE SUBSTRB(BOM4,0,40) 
+      			END 
+    		ELSE 
+      			BOM4 
+   			END AS BOM 
+		FROM A_CALIN
+		WHERE GUBUN = '01'
+			AND JUNPYO = ${junno}
+			AND GNO = ${sbvt_gno} 
+			AND LENGTH(TRIM(GAMT4)) != 0 
+			AND (To_Number(TRIM(GAMT4)) > 0 or 0 > To_Number(TRIM(GAMT4))) 
+    </select>
+    
+	<!-- id 속성은 DAO 의 메소드와 같아야 한다. 여기의 loginVO 는 mybatis-confg.xml 에 Alias 되어 있습니다. -->
+	<select id="createSequence" resultType="String" parameterType="String">
+		SELECT 
+			LPAD(TO_NUMBER(SUBSTR(MAX(BILLSEQ),13)) + 1, 13, 0) AS MAXSEQ
+		FROM
+			BILL_TRANS
+		WHERE BILLSEQ LIKE '%'||#{seq}||'%'
+    </select>              
+    
+	<!-- id 속성은 DAO 의 메소드와 같아야 한다. 여기의 loginVO 는 mybatis-confg.xml 에 Alias 되어 있습니다. -->
+	<insert id="saveBillTrans" parameterType="billTransVO">
+		<selectKey keyProperty="rtn" resultType="java.lang.Integer"> 
+			select 1 from dual
+		</selectKey> 
+	
+        INSERT INTO BILL_TRANS (BILLSEQ, SVENDERNO, RVENDERNO, DT, SUPMONEY, TAXMONEY,
+			TAXRATE, CASH, CHECKS, NOTE, CREDIT, GUBUN, BIGO, BILLTYPE,
+			SCOMPANY, SCEONAME, SUPTAE, SUPJONG, SADDRESS, SADDRESS2,
+			SUSER, SDIVISION, STELNO, SEMAIL, SREG_ID, RCOMPANY,
+			RCEONAME, RUPTAE, RUPJONG, RADDRESS, RADDRESS2, RUSER,
+			RDIVISION, RTELNO, REMAIL, CREATE_DT, REPORT_ISSUE_ID, TRANSYN, ETC04)
+		VALUES( 
+			#{billseq}, #{svenderno}, #{rvenderno}, #{dt}, #{supmoney}, #{taxmoney}
+			, #{taxrate}, #{cash}, #{checks}, #{note}, #{credit}, #{gubun}, '${cma_account} / ${bigo}', #{billtype}
+			, #{scompany}, #{sceoname}, #{suptae}, #{supjong}, #{saddress}, #{saddress2}
+			, #{suser}, #{sdivision}, #{stelno}, #{semail}, #{sreg_id}, #{rcompany}
+			, #{rceoname}, #{ruptae}, #{rupjong}, #{raddress}, #{raddress2}, #{ruser} 
+			, #{rdivision}, #{rtelno}, #{remail}, to_char(sysdate,'yyyymmdd'),' ', 'N', #{etc04})
+    </insert>
+    
+	<!-- id 속성은 DAO 의 메소드와 같아야 한다. 여기의 loginVO 는 mybatis-confg.xml 에 Alias 되어 있습니다. -->
+	<insert id="saveBillTransItem" parameterType="billTransItem">
+		<selectKey keyProperty="rtn" resultType="java.lang.Integer"> 
+			select 1 from dual
+		</selectKey> 
+	
+        INSERT INTO BILL_TRANS_ITEM (
+        	BILLSEQ, ITEMSEQ, TAX, SUP, DANGA, VLM,UNIT, OBJ, DT, REMARK)
+		VALUES( 
+			#{billseq},#{itemseq},#{tax},#{sup},#{danga}
+			,#{vlm},#{unit},#{obj},#{dt},#{remark} )
+    </insert>
+    
+	<!-- id 속성은 DAO 의 메소드와 같아야 한다. 여기의 loginVO 는 mybatis-confg.xml 에 Alias 되어 있습니다. -->
+	<insert id="save_tos" parameterType="kr.co.hjitERS.vo.SerialMainVO">
+		<selectKey keyProperty="rtn" resultType="java.lang.Integer"> 
+			select 1 from dual
+		</selectKey> 
+	
+        INSERT INTO S_SHIPPER_MAIN
+        	(GUBUN, SERIAL, SALE_CLASS, ISSUE_DATE, CU_CODE, TAKE_USER
+        	, TAKE_USERMAIL, TAX_SNUM, PROC_TYPE, SHIP_CUSTOMS, SHIP_TOT
+        	, SHIP_AMT, SHIP_VAT, SHIP_DEP, INUSER, INDATE)
+		VALUES 
+		(${gubun}, ${serial}, ${sale_class}, ${issue_date}, ${cu_code}, ${take_user}
+		, ${take_usermail}, ${tax_snum}, ${proc_type}, ${ship_customs}, ${ship_tot}
+		, ${ship_amt}, ${ship_vat}, ${ship_dep}, ${inuser}, ${indate}
+		) 
+    </insert>
+    
+	<!-- id 속성은 DAO 의 메소드와 같아야 한다. 여기의 loginVO 는 mybatis-confg.xml 에 Alias 되어 있습니다. -->
+	<update id="vat_Resseq" parameterType="String">
+		<selectKey keyProperty="rtn" resultType="java.lang.Integer"> 
+			select 1 from dual
+		</selectKey> 
+	
+        UPDATE
+        	A_SB_VAT
+        SET      	
+			RESSEQ = #{resseq}
+        WHERE 
+        	SBVT_GUBUN = #{gubun}
+			AND SBVT_CODE = #{junno}
+			AND SBVT_GNO = #{sbvt_gno} 
+        	
+    </update>
+</mapper>

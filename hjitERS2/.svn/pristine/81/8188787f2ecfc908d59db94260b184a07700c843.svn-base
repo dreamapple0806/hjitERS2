@@ -1,0 +1,41 @@
+package kr.co.hjitERS.service.dao;
+
+import java.util.ArrayList;
+
+import org.apache.ibatis.annotations.Param;
+
+import kr.co.hjitERS.vo.InAccountManageVO;
+import kr.co.hjitERS.vo.ShipperPreVO;
+import kr.co.hjitERS.vo.ShipperVO;
+
+public interface ShipperDAO {
+	ArrayList<ShipperVO> SearchContAction(@Param("bie_ship_contno_shr") String bie_ship_contno_shr, @Param("bie_ship_blno_shr") String bie_ship_blno_shr) throws Exception;
+	ArrayList<ShipperPreVO> SearchPreContAction(@Param("bie_ship_contno_shr") String bie_ship_contno_shr, @Param("bie_ship_blno_shr") String bie_ship_blno_shr, @Param("demurrage") String demurrage) throws Exception;
+	ArrayList<ShipperVO> Search_PrePaymentCont_Select(@Param("bie_ship_contno_shr") String bie_ship_contno_shr, @Param("bie_ship_blno_shr") String bie_ship_blno_shr) throws Exception;
+	ShipperVO Search_PrePaymentCont_SelectOne(@Param("bie_ship_contno_shr") String bie_ship_contno_shr, @Param("bie_ship_blno_shr") String bie_ship_blno_shr
+			, String prePayment, @Param("bie_ship_hold") String bie_ship_hold) throws Exception;
+	
+	ArrayList<InAccountManageVO> SearchVirAccountJson(@Param("cu_code") String cu_code, @Param("cma_account") String cma_account, @Param("virAcct_date") String virAcct_date) throws Exception;
+	
+	ShipperVO HoldContAction(@Param("bie_ship_contno") String bie_ship_contno, @Param("bie_ship_point") String bie_ship_point, @Param("bie_ship_hold") String bie_ship_hold, @Param("bie_ship_seq") String bie_ship_seq) throws Exception;
+	InAccountManageVO holdPurchaseVirAccount(@Param("vir_acctno") String vir_acctno, @Param("tran_dd") String tran_dd, @Param("tran_hh") String tran_hh
+			, @Param("incom_amount") String incom_amount, @Param("vatrsno") String vatrsno);
+	int searchCntInf(@Param("bie_ship_contno") String bie_ship_contno, @Param("bie_ship_blno") String bie_ship_blno
+			, @Param("bie_ship_point") String bie_ship_point, @Param("bie_ship_hold") String bie_ship_hold
+			, @Param("bie_ship_seq") String bie_ship_seq);
+	
+	int searchCnt(@Param("ship_contno") String ship_contno, @Param("ship_point") String ship_point
+			, @Param("ship_hold") String ship_hold, @Param("ship_seq") String ship_seq
+			, @Param("ship_blno") String ship_blno, @Param("ship_vessel") String ship_vessel
+			, @Param("ship_voyage") String ship_voyage, @Param("ship_operator") String ship_operator
+			, @Param("ship_total") String ship_total, @Param("ship_limitdate") String ship_limitdate);
+	
+	String save_tosYsearch(@Param("contno") String contno, @Param("blno") String blno, @Param("ship_limitdate") String ship_limitdate);
+
+	String save_tosYcreate(@Param("contno") String contno, @Param("point") String point, @Param("hold") String hold
+			, @Param("ship_limitdate") String ship_limitdate, @Param("vessel") String vessel, @Param("voyage") String voyage);
+	
+	String save_tosN(@Param("contno") String contno, @Param("point") String point, @Param("seq") String seq
+			, @Param("hold") String hold, @Param("refno") String refno, @Param("invoiceno") String invoiceno, @Param("count") String count, @Param("shipAmount") String shipAmount);
+	
+}

@@ -1,0 +1,108 @@
+package kr.co.hjitERS.service.impl;
+
+import java.util.ArrayList;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import kr.co.hjitERS.service.dao.ShipperDAO;
+import kr.co.hjitERS.vo.InAccountManageVO;
+import kr.co.hjitERS.vo.ShipperPreVO;
+import kr.co.hjitERS.vo.ShipperVO;
+
+@Service("shipperService")
+public class ShipperServiceImpl implements ShipperDAO{
+	
+	@Autowired
+	private ShipperDAO shipperDAO;
+
+	@Override
+	public ArrayList<ShipperVO> SearchContAction(String bie_ship_contno_shr, String bie_ship_blno_shr) throws Exception {
+		return shipperDAO.SearchContAction(bie_ship_contno_shr, bie_ship_blno_shr);
+	}
+
+	@Override
+	public ArrayList<ShipperPreVO> SearchPreContAction(String bie_ship_contno_shr, String bie_ship_blno_shr, String demurrage)
+			throws Exception {
+		return shipperDAO.SearchPreContAction(bie_ship_contno_shr, bie_ship_blno_shr, demurrage);
+	}
+
+	@Override
+	public ArrayList<ShipperVO> Search_PrePaymentCont_Select(String bie_ship_contno_shr, String bie_ship_blno_shr)
+			throws Exception {
+		return shipperDAO.Search_PrePaymentCont_Select(bie_ship_contno_shr, bie_ship_blno_shr);
+	}
+
+	@Override
+	public ArrayList<InAccountManageVO> SearchVirAccountJson(String cu_code) throws Exception {
+		return shipperDAO.SearchVirAccountJson(cu_code);
+	}
+
+	@Override
+	public ShipperVO HoldContAction(String bie_ship_contno, String bie_ship_point, String bie_ship_hold,
+			String bie_ship_seq) throws Exception {
+		return shipperDAO.HoldContAction(bie_ship_contno, bie_ship_point, bie_ship_hold, bie_ship_seq);
+	}
+
+	@Override
+	public InAccountManageVO holdPurchaseVirAccount(String vir_acctno, String tran_dd, String tran_hh) {
+		return shipperDAO.holdPurchaseVirAccount(vir_acctno, tran_dd, tran_hh);
+	}
+
+	@Override
+	public int searchCntInf(String bie_ship_contno, String bie_ship_blno, String bie_ship_point, String bie_ship_hold, String bie_ship_seq) {
+		return shipperDAO.searchCntInf(bie_ship_contno, bie_ship_blno, bie_ship_point, bie_ship_hold, bie_ship_seq);
+	}
+
+	@Override
+	public int searchCnt(String ship_contno, String ship_point, String ship_hold, String ship_seq
+						, String ship_blno, String ship_vessel, String ship_voyage
+						, String ship_operator, String ship_total, String ship_limitdate) {
+		return shipperDAO.searchCnt(ship_contno, ship_point, ship_hold, ship_seq
+									, ship_blno, ship_vessel, ship_voyage
+									, ship_operator, ship_total, ship_limitdate);
+	}
+
+	@Override
+	public String save_tosN(String contno, String point, String seq, String hold, String refno, String invoiceno, String count, String shipAmount) {
+		String strErrMessage = "";
+		try {
+			shipperDAO.save_tosN(contno, point, seq, hold, refno, invoiceno, count, shipAmount);
+		} catch (Exception e) {
+			e.printStackTrace();
+			strErrMessage = "0";
+		}
+		return strErrMessage;
+	}
+
+	@Override
+	public String save_tosYsearch(String contno, String point, String ship_limitdate) {
+		String strErrMessage = " ";
+		try {
+			shipperDAO.save_tosYsearch(contno, point, ship_limitdate);
+		} catch (Exception e) {
+			e.printStackTrace();
+			strErrMessage = "0";
+		}
+		return strErrMessage;
+	}
+
+	@Override
+	public String save_tosYcreate(String contno, String point, String hold, String ship_limitdate, String vessel, String voyage) {
+		String strErrMessage = " ";
+		try {
+			shipperDAO.save_tosYcreate(contno, point, hold, ship_limitdate, vessel, voyage);
+		} catch (Exception e) {
+			e.printStackTrace();
+			strErrMessage = "0";
+		}
+		return strErrMessage;
+	}
+
+	@Override
+	public ShipperVO Search_PrePaymentCont_Select(String bie_ship_contno_shr, String bie_ship_blno_shr,
+			String prePayment) throws Exception {
+
+		return shipperDAO.Search_PrePaymentCont_Select(bie_ship_contno_shr, bie_ship_blno_shr, prePayment);
+	}
+
+}

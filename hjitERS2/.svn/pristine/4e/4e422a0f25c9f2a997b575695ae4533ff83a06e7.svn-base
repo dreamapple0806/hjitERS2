@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 맵핑될 DAO 인터페이스의 Full name 을 줍니다. -->
+<mapper namespace="kr.co.hjitERS.service.dao.ShipperDAO">
+	
+	<select id="SearchContAction" resultType="shipperVO" parameterType="String">
+		SELECT a.bie_ship_contno, a.bie_ship_point, a.bie_ship_hold, a.bie_ship_seq  
+              , a.bie_ship_blno, a.bie_ship_refno, a.bie_ship_refno2 ,a.bie_ship_personal 
+   	         , a.bie_ship_holddesc, a.bie_ship_vessel, a.bie_ship_voyage, a.bie_ship_operator, a.bie_ship_type 
+   	         , a.bie_ship_count 
+   	         , a.bie_ship_unit, a.bie_ship_qty, a.bie_ship_rate 
+   	         , a.bie_ship_total, a.bie_ship_amount, a.bie_ship_vat 
+   	         , a.bie_ship_payment, a.bie_ship_driver_name, a.bie_ship_driver_hp, a.bie_ship_truckno 
+   	         , a.bie_ship_basedate, a.bie_ship_limitdate, a.bie_ship_tran_date, a.bie_ship_tran_time 
+   	         , a.bie_ship_user, a.bie_ship_erpconfirm, a.bie_ship_taxdate, a.bie_ship_mrn 
+   	         , a.bie_ship_invoiceno, a.bie_ship_vesselname, a.bie_ship_arrive, a.bie_ship_remark 
+   	         , a.bie_ship_flag, a.bie_ship_countdate, a.bie_ship_oldamount, a.bie_ship_order  
+		FROM bie_shipper_inf a 	
+		WHERE 1=1 
+			AND nvl(a.bie_ship_erpconfirm,'0') = '0' 
+			AND nvl(a.bie_ship_payment,'N') = 'N' 
+			AND nvl(a.bie_ship_total, '0') != '0' 
+			AND nvl(a.bie_ship_amount, '0') != '0' 
+			AND nvl(a.bie_ship_vat, '0') != '0' 
+			<if test='!bie_ship_contno_shr.equals("")'>
+			AND a.bie_ship_contno like '%' || #{bie_ship_contno_shr} || '%'
+			</if>
+			<if test='!bie_ship_blno_shr.equals("")'>
+			AND a.bie_ship_blno like '%' || #{bie_ship_blno_shr} || '%'
+			</if>
+		ORDER BY a.bie_ship_contno, a.bie_ship_seq 
+	</select>	
+	
+	<!-- 사전납부 컨테이터 데이터 생성 -->
+	<select id="SearchPreContAction" parameterType="string" statementType="CALLABLE">
+		{ 
+			CALL PRO_BILL_SHIPPER_HOLD_SEARCH(<choose>
+				<when test="bie_ship_contno_shr == 'NULL' ">
+				NULL
+				</when>
+				<otherwise>
+				#{bie_ship_contno_shr, mode=IN, jdbcType=NULL}
+				</otherwise>
+			</choose>
+			<choose>
+				<when test="bie_ship_blno_shr == 'NULL' ">
+				, NULL
+				</when>
+				<otherwise>
+				, #{bie_ship_blno_shr, mode=IN, jdbcType=NULL}
+				</otherwise>
+			</choose>
+				, #{demurrage, mode=IN, jdbcType=NULL}
+			)
+		}
+	</select>
+	
+	<!-- 사전납부 컨테이너 데이터 조회(홀드해제시) -->
+	<select id="Search_PrePaymentCont_SelectOne" resultType="shipperVO" parameterType="String">
+		SELECT A.BIE_FCAST_CONTNO AS BIE_SHIP_CONTNO, A.BIE_FCAST_POINT AS BIE_SHIP_POINT, A.BIE_FCAST_HOLD AS BIE_SHIP_HOLD, A.BIE_FCAST_SEQ AS BIE_SHIP_SEQ 
+ 			, A.BIE_FCAST_BLNO AS BIE_SHIP_BLNO, '-' AS BIE_SHIP_REFNO, '-' AS BIE_SHIP_REFNO2, '-' AS BIE_SHIP_PERSONAL 
+ 			, A.BIE_FCAST_HOLDDESC AS BIE_SHIP_HOLDDESC, A.BIE_FCAST_VESSEL AS BIE_SHIP_VESSEL, A.BIE_FCAST_VOYAGE AS BIE_SHIP_VOYAGE, A.BIE_FCAST_OPERATOR AS BIE_SHIP_OPERATOR, A.BIE_FCAST_TYPE AS BIE_SHIP_TYPE 
+ 			, A.BIE_FCAST_COUNT AS BIE_SHIP_COUNT 
+ 			, A.BIE_FCAST_UNIT AS BIE_SHIP_UNIT, A.BIE_FCAST_QTY AS BIE_SHIP_QTY, A.BIE_FCAST_RATE AS BIE_SHIP_RATE 
+ 			, A.BIE_FCAST_TOTAL AS BIE_SHIP_TOTAL, A.BIE_FCAST_AMOUNT AS BIE_SHIP_AMOUNT, A.BIE_FCAST_VAT AS BIE_SHIP_VAT 
+ 			, A.BIE_FCAST_PAYMENT AS BIE_SHIP_PAYMENT, '-' AS BIE_SHIP_DRIVER_NAME, '-' AS BIE_SHIP_DRIVER_HP, '-' AS BIE_SHIP_TRUCKNO 
+ 			, A.BIE_FCAST_BASEDATE AS BIE_SHIP_BASEDATE, A.BIE_FCAST_LIMITDATE AS BIE_SHIP_LIMITDATE, '-' AS BIE_SHIP_TRAN_DATE, '-' AS BIE_SHIP_TRAN_TIME 
+ 			, '-' AS BIE_SHIP_USER, '-' AS BIE_SHIP_ERPCONFIRM, '-' AS BIE_SHIP_TAXDATE, BIE_FCAST_MRN AS BIE_SHIP_MRN 
+ 			, BIE_FCAST_INVOICENO AS BIE_SHIP_INVOICENO, A.BIE_FCAST_VESSEL AS BIE_SHIP_VESSELNAME, BIE_FCAST_ARRIVE AS BIE_SHIP_ARRIVE, '-' AS BIE_SHIP_REMARK 
+ 			, '-' AS BIE_SHIP_FLAG, '-' AS BIE_SHIP_COUNTDATE, '-' AS BIE_SHIP_OLDAMOUNT, '-' AS BIE_SHIP_ORDER, A.BIE_FCAST_DEMURRAGE AS BIE_SHIP_DEMURRAGE, A.BIE_FCAST_PINTIME AS BIE_SHIP_PINTIME
+ 		FROM BIE_FORECAST_INF A
+		WHERE 1=1
+			<choose>
+				<when test="bie_ship_blno_shr == '' and bie_ship_contno_shr != '' ">
+				AND A.BIE_FCAST_CONTNO = #{bie_ship_contno_shr}
+				AND A.BIE_FCAST_HOLD = #{bie_ship_hold}
+				ORDER BY A.BIE_FCAST_CONTNO, A.UPD_DT
+				</when>
+				
+				<when test="bie_ship_blno_shr != '' and bie_ship_contno_shr != '' ">
+				AND A.BIE_FCAST_CONTNO = #{bie_ship_contno_shr} AND A.BIE_FCAST_BLNO = #{bie_ship_blno_shr}
+				AND A.BIE_FCAST_HOLD = #{bie_ship_hold}
+				ORDER BY A.BIE_FCAST_CONTNO, A.UPD_DT
+				</when>
+				
+				<when test="bie_ship_blno_shr != '' and bie_ship_contno_shr == '' ">
+				AND A.BIE_FCAST_BLNO = #{bie_ship_blno_shr}
+				AND A.BIE_FCAST_HOLD = #{bie_ship_hold}
+				ORDER BY A.BIE_FCAST_CONTNO, A.UPD_DT
+				</when>
+				
+				<when test="bie_ship_blno_shr == '' and bie_ship_contno_shr == '' ">
+				AND A.BIE_FCAST_BLNO = ''
+				AND A.BIE_FCAST_HOLD = ''
+				ORDER BY A.BIE_FCAST_CONTNO, A.UPD_DT
+				</when>
+			</choose>
+	</select>
+	
+	<!-- 사전납부 컨테이너 데이터 조회(홀드조회시) -->
+	<select id="Search_PrePaymentCont_Select" resultType="shipperVO" parameterType="String">
+		SELECT A.BIE_FCAST_CONTNO AS BIE_SHIP_CONTNO, A.BIE_FCAST_POINT AS BIE_SHIP_POINT, A.BIE_FCAST_HOLD AS BIE_SHIP_HOLD, A.BIE_FCAST_SEQ AS BIE_SHIP_SEQ 
+ 			, A.BIE_FCAST_BLNO AS BIE_SHIP_BLNO, '-' AS BIE_SHIP_REFNO, '-' AS BIE_SHIP_REFNO2, '-' AS BIE_SHIP_PERSONAL 
+ 			, A.BIE_FCAST_HOLDDESC AS BIE_SHIP_HOLDDESC, A.BIE_FCAST_VESSEL AS BIE_SHIP_VESSEL, A.BIE_FCAST_VOYAGE AS BIE_SHIP_VOYAGE, A.BIE_FCAST_OPERATOR AS BIE_SHIP_OPERATOR, A.BIE_FCAST_TYPE AS BIE_SHIP_TYPE 
+ 			, A.BIE_FCAST_COUNT AS BIE_SHIP_COUNT 
+ 			, A.BIE_FCAST_UNIT AS BIE_SHIP_UNIT, A.BIE_FCAST_QTY AS BIE_SHIP_QTY, A.BIE_FCAST_RATE AS BIE_SHIP_RATE 
+ 			, A.BIE_FCAST_TOTAL AS BIE_SHIP_TOTAL, A.BIE_FCAST_AMOUNT AS BIE_SHIP_AMOUNT, A.BIE_FCAST_VAT AS BIE_SHIP_VAT 
+ 			, A.BIE_FCAST_PAYMENT AS BIE_SHIP_PAYMENT, '-' AS BIE_SHIP_DRIVER_NAME, '-' AS BIE_SHIP_DRIVER_HP, '-' AS BIE_SHIP_TRUCKNO 
+ 			, A.BIE_FCAST_BASEDATE AS BIE_SHIP_BASEDATE, A.BIE_FCAST_LIMITDATE AS BIE_SHIP_LIMITDATE, '-' AS BIE_SHIP_TRAN_DATE, '-' AS BIE_SHIP_TRAN_TIME 
+ 			, '-' AS BIE_SHIP_USER, '-' AS BIE_SHIP_ERPCONFIRM, '-' AS BIE_SHIP_TAXDATE, BIE_FCAST_MRN AS BIE_SHIP_MRN 
+ 			, BIE_FCAST_INVOICENO AS BIE_SHIP_INVOICENO, A.BIE_FCAST_VESSEL AS BIE_SHIP_VESSELNAME, BIE_FCAST_ARRIVE AS BIE_SHIP_ARRIVE, '-' AS BIE_SHIP_REMARK 
+ 			, '-' AS BIE_SHIP_FLAG, '-' AS BIE_SHIP_COUNTDATE, '-' AS BIE_SHIP_OLDAMOUNT, '-' AS BIE_SHIP_ORDER, A.BIE_FCAST_DEMURRAGE AS BIE_SHIP_DEMURRAGE, A.BIE_FCAST_PINTIME AS BIE_SHIP_PINTIME
+ 		FROM BIE_FORECAST_INF A
+		WHERE 1=1
+			<choose>
+				<when test="bie_ship_contno_shr != '' and bie_ship_blno_shr == 'NULL' ">
+				AND A.BIE_FCAST_CONTNO = #{bie_ship_contno_shr}
+				ORDER BY A.BIE_FCAST_CONTNO, A.UPD_DT
+				</when>
+				
+				<when test="bie_ship_blno_shr != 'NULL' and bie_ship_contno_shr == 'NULL' ">
+				AND A.BIE_FCAST_BLNO = #{bie_ship_blno_shr}
+				ORDER BY A.BIE_FCAST_CONTNO, A.UPD_DT
+				</when>
+				
+				<otherwise>
+				AND A.BIE_FCAST_CONTNO = #{bie_ship_contno_shr} AND A.BIE_FCAST_BLNO = #{bie_ship_blno_shr}
+				ORDER BY A.BIE_FCAST_CONTNO, A.UPD_DT
+				</otherwise>
+			</choose>
+	</select>
+	
+	<select id="holdPurchaseVirAccount" resultType="InAccountManageVO" parameterType="String">
+		SELECT 
+			a.vir_acctno, a.tran_dd, a.tran_hh, a.incom_amount, a.rndclrnm
+			, a.except, a.remark, a.istcd, a.vatrsno, a.vaxclmthcd
+			, b.cu_sangho , nvl(process_amount, 0) as outcom_amount
+		FROM 
+			hist_virt_acct_trori a 
+			left outer join c_cust b 
+				on a.vir_acctno = b.cma_account 
+		WHERE 
+			b.cu_gubun = '01' 
+    		and a.vir_acctno = #{vir_acctno}
+			and a.tran_dd = #{tran_dd} 
+    		and a.tran_hh = #{tran_hh}  
+    		and a.incom_amount = #{incom_amount} 
+    		and a.vatrsno = #{vatrsno} 
+	</select>	
+	
+	<select id="SearchVirAccountJson" resultType="InAccountManageVO" parameterType="String">
+		SELECT 
+			a.vir_acctno, a.tran_dd, a.tran_hh, a.incom_amount, a.rndclrnm
+			, a.except, a.remark, a.istcd, a.vatrsno, a.vaxclmthcd
+			, b.cu_sangho , nvl(process_amount, 0) as outcom_amount
+		FROM 
+			hist_virt_acct_trori a 
+			left outer join c_cust b 
+				on a.vir_acctno = b.cma_account 
+		WHERE 
+			b.cu_gubun = '01' 
+    		and b.cu_code = #{cu_code} 
+    		and a.vir_acctno = #{cma_account}
+			and a.tran_dd = #{virAcct_date}
+    		and nvl(a.except,'0') = '0' 
+    		and nvl(a.process,'0') = '0'
+	</select>	
+	
+	<select id="HoldContAction" resultType="shipperVO" parameterType="String">
+		SELECT a.bie_ship_contno, a.bie_ship_point, a.bie_ship_hold, a.bie_ship_seq  
+              , a.bie_ship_blno, a.bie_ship_refno, a.bie_ship_refno2 ,a.bie_ship_personal 
+   	         , a.bie_ship_holddesc, a.bie_ship_vessel, a.bie_ship_voyage, a.bie_ship_operator, a.bie_ship_type 
+   	         , a.bie_ship_count 
+   	         , a.bie_ship_unit, a.bie_ship_qty, a.bie_ship_rate 
+   	         , a.bie_ship_total, a.bie_ship_amount, a.bie_ship_vat 
+   	         , a.bie_ship_payment, a.bie_ship_driver_name, a.bie_ship_driver_hp, a.bie_ship_truckno 
+   	         , a.bie_ship_basedate, a.bie_ship_limitdate, a.bie_ship_tran_date, a.bie_ship_tran_time 
+   	         , a.bie_ship_user, a.bie_ship_erpconfirm, a.bie_ship_taxdate, a.bie_ship_mrn 
+   	         , a.bie_ship_invoiceno, a.bie_ship_vesselname, a.bie_ship_arrive, a.bie_ship_remark 
+   	         , a.bie_ship_flag, a.bie_ship_countdate, a.bie_ship_oldamount, a.bie_ship_order  
+		FROM bie_shipper_inf a 	
+		WHERE 1=1 
+			AND nvl(a.bie_ship_erpconfirm,'0') = '0' 
+			AND nvl(a.bie_ship_payment,'N') = 'N' 
+			AND nvl(a.bie_ship_total, '0') != '0' 
+			AND nvl(a.bie_ship_amount, '0') != '0' 
+			AND nvl(a.bie_ship_vat, '0') != '0' 
+			<if test='!bie_ship_contno.equals("")'>
+			AND a.bie_ship_contno like '%' || #{bie_ship_contno} || '%'
+			</if>
+			<if test='!bie_ship_point.equals("")'>
+			AND a.bie_ship_point like '%' || #{bie_ship_point} || '%'
+			</if>
+			<if test='!bie_ship_hold.equals("")'>
+			AND a.bie_ship_hold like '%' || #{bie_ship_hold} || '%'
+			</if>
+			<if test='!bie_ship_seq.equals("")'>
+			AND a.bie_ship_seq like '%' || #{bie_ship_seq} || '%'
+			</if>
+		ORDER BY a.bie_ship_contno, a.bie_ship_seq 
+	</select>	
+		
+	<select id="searchCntInf" resultType="int" parameterType="String">
+		SELECT 
+			COUNT(1) AS cnt 
+		FROM 
+			bie_shipper_inf
+		WHERE 
+			1 = 1
+			<if test='!bie_ship_contno.equals("")'>
+            	AND BIE_SHIP_CONTNO LIKE '%' || #{bie_ship_contno} || '%'
+			</if>
+    		and bie_ship_point = #{bie_ship_point}
+            and bie_ship_hold = #{bie_ship_hold}
+            and bie_ship_seq = #{bie_ship_seq}
+			<if test='!bie_ship_blno.equals("")'>
+        	   and bie_ship_blno LIKE '%' || #{bie_ship_blno} || '%'
+			</if>
+            and bie_ship_payment = 'Y'
+            and bie_ship_erpconfirm = '1'
+	</select>		
+	
+	<select id="searchCnt" resultType="int" parameterType="String">
+		SELECT
+			COUNT(1) AS CNT  		
+  		FROM S_SHIPPER_SUB
+ 		WHERE 
+ 			SHIP_CONTNO = #{ship_contno}
+   			AND SHIP_POINT = #{ship_point}
+   			AND SHIP_HOLD = #{ship_hold}
+   			AND SHIP_SEQ = #{ship_seq}
+   			AND SHIP_BLNO = #{ship_blno}
+   			AND SHIP_VESSEL = #{ship_vessel}
+   			AND SHIP_VOYAGE = #{ship_voyage}
+   			AND SHIP_OPERATOR = #{ship_operator}
+   			AND SHIP_TOTAL = #{ship_total}
+   			AND SHIP_LIMITDATE = #{ship_limitdate}
+	</select>
+		
+	<select id="save_tosN" parameterType="string" statementType="CALLABLE">
+		{ 
+			CALL PRO_BILL_SHIPPER_WEB_OK (
+				#{contno, mode=IN, jdbcType=VARCHAR}
+				, #{point, mode=IN, jdbcType=VARCHAR}
+				, #{seq, mode=IN, jdbcType=VARCHAR}
+				, #{hold, mode=IN, jdbcType=VARCHAR}
+				, #{refno, mode=IN, jdbcType=VARCHAR}
+				, #{invoiceno, mode=IN, jdbcType=VARCHAR}
+				, NULL
+				, #{count, mode=IN, jdbcType=VARCHAR}
+				, #{shipAmount, mode=IN, jdbcType=VARCHAR}
+			)
+		}
+	</select>
+		
+	<select id="save_tosYsearch" parameterType="string" statementType="CALLABLE">
+		{ 
+			CALL PRO_BILL_SHIPPER_HOLD_SEARCH (
+			<choose>
+				<when test="contno == 'NULL' || contno == ''">
+				NULL
+				</when>
+				<otherwise>
+			 	#{contno, mode=IN, jdbcType=NULL}
+				</otherwise>
+			</choose>
+			<choose>
+				<when test="blno == 'NULL' || blno == ''">
+				, NULL
+				</when>
+				<otherwise>
+				, #{blno, mode=IN, jdbcType=NULL}
+				</otherwise>
+			</choose>
+				, #{ship_limitdate, mode=IN, jdbcType=VARCHAR}
+			)
+		}
+	</select>
+	
+	<select id="save_tosYcreate" parameterType="string" statementType="CALLABLE">
+		{ 
+			CALL PRO_BILL_SHIPPER_HOLD_CREATE (
+				#{contno, mode=IN, jdbcType=VARCHAR}
+				, #{point, mode=IN, jdbcType=VARCHAR}
+				, #{hold, mode=IN, jdbcType=VARCHAR}
+				, #{ship_limitdate, mode=IN, jdbcType=VARCHAR}
+				, #{vessel, mode=IN, jdbcType=VARCHAR}
+				, #{voyage, mode=IN, jdbcType=VARCHAR}
+			)
+		}
+	</select>
+</mapper>

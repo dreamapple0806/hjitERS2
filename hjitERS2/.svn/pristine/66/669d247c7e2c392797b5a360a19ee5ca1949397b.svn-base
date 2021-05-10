@@ -1,0 +1,625 @@
+package kr.co.hjitERS.service.impl;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
+
+import kr.co.hjitERS.controller.ShipperController;
+import kr.co.hjitERS.service.dao.JunpyoDAO;
+import kr.co.hjitERS.service.dao.SerialDAO;
+import kr.co.hjitERS.service.dao.ShipperDAO;
+import kr.co.hjitERS.util.FormatUtil;
+import kr.co.hjitERS.vo.BillTransItemVO;
+import kr.co.hjitERS.vo.BillTransVO;
+import kr.co.hjitERS.vo.DepoVO;
+import kr.co.hjitERS.vo.JunpyoVO;
+import kr.co.hjitERS.vo.SerialMainVO;
+import kr.co.hjitERS.vo.SerialSubVO;
+import kr.co.hjitERS.vo.VirAcctVO;
+
+@Service("junpyoService")
+public class JunpyoServiceImpl implements JunpyoDAO{
+	
+	private static final Logger logger = LoggerFactory.getLogger(ShipperController.class);
+	
+	@Autowired
+	private JunpyoDAO junpyoDAO;
+	@Autowired
+	private SerialDAO serialDAO;
+	@Autowired
+	private ShipperDAO shipperDAO;
+
+	@Autowired
+	private PlatformTransactionManager transactionManager;
+
+	DefaultTransactionDefinition def = null;
+	TransactionStatus status = null;
+
+	@Transactional
+	@Override
+	public String save(HttpServletRequest request, SerialMainVO beanMain, List<SerialSubVO> lstDataSub, List<VirAcctVO> lstDatainaccount, String prePayment) throws Exception {
+		String strErrMessage = "";
+	    
+    	try {
+    	    String demurrage = (String) request.getParameter("demurrage").replaceAll("-", "");	
+    	    
+    		def = new DefaultTransactionDefinition();
+			def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+
+			status = transactionManager.getTransaction(def);	
+    		
+    		//	1. 세금계산서 승인여부 확인
+			if (serialDAO.getDataBySerial(beanMain.getSerial()) != 0) {
+				throw new Exception("이미 세금계산서 발행완료되었습니다!!");
+			}
+
+			// 2. 홀드 해제시 전표생성 프로시져 실행
+			strErrMessage = junpyoDAO.save_junpyo(beanMain);
+    		logger.info("save_junpyo Result : " + strErrMessage);
+
+			// 3. 입금전표 생성
+			if(strErrMessage == null) {
+				strErrMessage = saveJunpyoMain(beanMain);
+	    		logger.info("saveJunpyoMain Result : " + strErrMessage);
+			} else{
+            	strErrMessage = "전표생성 프로시져";
+            	transactionManager(strErrMessage, status);
+            	return strErrMessage;
+            }
+			
+			// 4. 센드빌 세금계산서 발행
+			if(strErrMessage.equals("1")) {
+				strErrMessage = To_greenBillTb(beanMain, prePayment);
+	    		logger.info("To_greenBillTb Result : " + strErrMessage);
+			} else{
+            	strErrMessage = "입금전표 에러";
+            	transactionManager(strErrMessage, status);
+            	return strErrMessage;
+            }
+				
+			// 5. 홀드해지 - 프로시져 실행
+			if(strErrMessage.equals("1")) {
+				strErrMessage = save_tos(beanMain, lstDataSub, prePayment, demurrage);
+	    		logger.info("save_tos Result : " + strErrMessage);
+	    		
+			} else{
+            	strErrMessage = "세금계산서 발송 에러";
+            	transactionManager(strErrMessage, status);
+            	return strErrMessage;
+            }
+			
+			if(!strErrMessage.equals("1")) {
+				strErrMessage = "홀드해제 에러";
+	    		
+			} else {
+            	transactionManager(strErrMessage, status);
+            	return strErrMessage;
+			}
+				
+			
+    	} catch (Exception e) {
+			e.printStackTrace();
+			transactionManager.rollback(status);
+            strErrMessage = e.getMessage();
+			strErrMessage = "에러 롤백 2";
+		}
+
+		return strErrMessage;
+	}
+	
+	public void transactionManager(String strErrMessage, TransactionStatus status) {
+		if (strErrMessage.equals("1")) {
+        	logger.info("transactionManager.commited : " + strErrMessage);
+			transactionManager.commit(status);	
+    		status.flush();
+        } else{
+        	logger.info("transactionManager.rollback : " + strErrMessage);
+			transactionManager.rollback(status);	
+    		status.flush();
+        }
+	}
+	
+	public String save_tos(SerialMainVO beanMain, List<SerialSubVO> lstDataSub, String prePayment, String demurrage) {
+		String strErrMessage = "";
+		
+		try {
+			for(int i=0; i<lstDataSub.size(); i++) {
+				SerialSubVO serialSubVO = new SerialSubVO();
+				serialSubVO = lstDataSub.get(i);
+				
+				String contno = serialSubVO.getShip_contno();
+				String point = serialSubVO.getShip_point();
+				String seq = serialSubVO.getShip_seq();
+				String hold = serialSubVO.getShip_hold();
+				String refno = serialSubVO.getShip_refno();
+				String invoiceno = serialSubVO.getShip_invoiceno();
+				String count = serialSubVO.getShip_count();
+				String shipAmount = serialSubVO.getShip_amount();
+				String ship_limitdate = serialSubVO.getShip_limitdate();
+				String vessel = serialSubVO.getShip_vessel();
+				String voyage = serialSubVO.getShip_voyage();
+				String blno = serialSubVO.getShip_blno();
+				
+				logger.info("hold data 1 : " + contno + ", "+ blno + ", "+ ship_limitdate + ", " + demurrage);
+				logger.info("hold data 2 : " + contno + ", "+ point + ", "+ seq + ", "+ hold + ", "+ refno + ", "+ invoiceno + ", "+ count + ", "+ shipAmount);
+				
+				if(prePayment.equals("Y")) {
+					strErrMessage = shipperDAO.save_tosYsearch(contno, blno, demurrage);
+					strErrMessage = shipperDAO.save_tosYcreate(contno, point, hold, demurrage, vessel, voyage);
+					logger.info("save_tosYcreate prePayment : " + prePayment + " / strErrMessage : " + strErrMessage);
+				}
+				if(prePayment.equals("N")) {
+					strErrMessage = shipperDAO.save_tosN(contno, point, seq, hold, refno, invoiceno, count, shipAmount);
+					logger.info("save_tosN prePayment : " + prePayment + " / strErrMessage : " + strErrMessage);
+				}
+				
+				if(strErrMessage == null) {
+					strErrMessage = "1";
+				}
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			strErrMessage = "0";
+		}
+		return strErrMessage;
+	}
+	
+	private String To_greenBillTb(SerialMainVO beanMain, String prePayment) {
+		String strErrMessage = "";
+		
+		try {
+			// BillTrans에 넣을 데이터 조회
+			HashMap<String, String> jun_no = junpyoDAO.searchSerialJunno(beanMain.getSerial());
+			HashMap<String, String> billTaxClass = junpyoDAO.searchBillClass(beanMain.getSerial());
+			HashMap<String, String> searchVatInfo = junpyoDAO.searchVatInfo((String) jun_no.get("JUN_NO"));
+			
+			// BillTransItem에 넣을 데이터 조회
+			List<BillTransItemVO> searchBillTransInfo = junpyoDAO.searchBillTransInfo((String)jun_no.get("JUN_NO"), String.valueOf(searchVatInfo.get("SBVT_GNO")));
+			
+			// BillTrans에 넣을 데이터 세팅
+			String BILLTYPE = "";
+			String BILL_CLASS = BILL_CLASS = billTaxClass.get("BILL_CLASS");
+			String TAX_CLASS = TAX_CLASS = billTaxClass.get("TAXCLASS");
+			
+			if(billTaxClass.get("BILL_CLASS") == null) {
+				BILL_CLASS = "0";
+			}
+			if(billTaxClass.get("TAXCLASS") == null) {
+				TAX_CLASS = "0";
+			}
+			
+			String RVENDERNO = (String)searchVatInfo.get("CU_ADCODE");
+			String CMA_ACCOUNT = "산업은행 - " + FormatUtil.nvl(String.valueOf(searchVatInfo.get("CMA_ACCOUNT")), " ") + ", 본 입금계좌 이외의 입금은 효력이 없습니다.";
+			String seq = "";
+			
+			if (RVENDERNO.length() == 13){
+				BILLTYPE = "61";		//세금계산서 종류_11(비회원세금계산서)_주민등록번호인경우
+			}else{
+				BILLTYPE = "11";		//세금계산서 종류_11(비회원세금계산서)_사업자번호인경우						
+			}
+			
+			if (String.valueOf(searchVatInfo.get("RESSEQ")).trim().length() == 0){
+				Date currentTime = new Date();
+				SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd");		
+				
+				String temp = "";
+				String Head = "HJIT";
+				String Tday = fmt.format(currentTime);
+				seq = Head + Tday;
+				
+				temp = junpyoDAO.createSequence(seq);
+				if (temp == null){
+	        		seq += "0000000000001";
+	        	}else{
+	        		seq += temp;
+	        	}
+			}else{
+				new Exception("이미 발행된 세금 계산서가 있습니다.");
+			}
+			
+			BillTransVO billTransVO = new BillTransVO();
+			billTransVO.setBillseq(FormatUtil.nvl(seq, " "));
+			billTransVO.setSvenderno(FormatUtil.nvl(String.valueOf(searchVatInfo.get("CO_SANO")), " "));
+			billTransVO.setRvenderno(FormatUtil.nvl(String.valueOf(searchVatInfo.get("CU_ADCODE")), " "));
+			billTransVO.setDt(FormatUtil.formatStr(FormatUtil.nvl(String.valueOf(searchVatInfo.get("SBVT_DATE")), " "),"4-2-2"));
+			billTransVO.setSupmoney(FormatUtil.nvl(String.valueOf(searchVatInfo.get("SBVT_GONGAMT")), " "));
+			billTransVO.setTaxmoney(FormatUtil.nvl(String.valueOf(searchVatInfo.get("SBVT_VAT")), " "));
+			billTransVO.setTaxrate(FormatUtil.nvl(TAX_CLASS, "0"));
+			billTransVO.setCash(FormatUtil.getNum(FormatUtil.nvl(String.valueOf(searchVatInfo.get("CASH")), "0")));
+			billTransVO.setChecks(FormatUtil.getNum(FormatUtil.nvl(String.valueOf(searchVatInfo.get("A_CHECK")), "0")));
+			billTransVO.setNote(FormatUtil.getNum(FormatUtil.nvl(String.valueOf(searchVatInfo.get("CREDIT")), "0")));
+			billTransVO.setCredit(FormatUtil.getNum(FormatUtil.nvl(String.valueOf(searchVatInfo.get("MISU")), "0")));
+			billTransVO.setGubun(FormatUtil.nvl(BILL_CLASS,"2"));
+			billTransVO.setBigo(FormatUtil.nvl(String.valueOf(searchVatInfo.get("SBVT_CCD")), " "));
+			billTransVO.setBilltype(BILLTYPE);
+			billTransVO.setScompany(FormatUtil.nvl(String.valueOf(searchVatInfo.get("CO_SANAME")), " "));
+			billTransVO.setSceoname(FormatUtil.nvl(String.valueOf(searchVatInfo.get("CO_MASTER")), " "));
+			billTransVO.setSuptae(FormatUtil.nvl(String.valueOf(searchVatInfo.get("CO_UPTAE")), " "));
+			billTransVO.setSupjong(FormatUtil.nvl(String.valueOf(searchVatInfo.get("CO_UPJONG")), " "));
+			billTransVO.setSaddress(FormatUtil.nvl(String.valueOf(searchVatInfo.get("CO_JUSO")), " "));
+			billTransVO.setSaddress2(" ");
+			billTransVO.setSuser(FormatUtil.nvl("영업팀2", " "));
+			billTransVO.setSdivision(" ");
+			billTransVO.setStelno("032-202-4936,4937");
+			billTransVO.setSemail("billing@hjit.co.kr");
+			billTransVO.setSreg_id("0");
+			billTransVO.setRcompany(FormatUtil.nvl(String.valueOf(searchVatInfo.get("CU_SANGHO")), " "));
+			billTransVO.setRceoname(FormatUtil.nvl(String.valueOf(searchVatInfo.get("CU_MASTER")), " "));
+			billTransVO.setRuptae(FormatUtil.nvl(String.valueOf(searchVatInfo.get("CU_UPTAE")), " "));
+			billTransVO.setRupjong(FormatUtil.nvl(String.valueOf(searchVatInfo.get("CU_UPJONG")), " "));
+			billTransVO.setRaddress(FormatUtil.nvl(String.valueOf(searchVatInfo.get("CU_JUSO")), " "));
+			billTransVO.setRaddress2(" ");
+			billTransVO.setRuser(FormatUtil.nvl(String.valueOf(searchVatInfo.get("CU_ENDUSER")), " "));
+			billTransVO.setRdivision(" ");
+			billTransVO.setRtelno(FormatUtil.nvl(String.valueOf(searchVatInfo.get("CU_TAKEUSERTEL")), " "));
+			billTransVO.setRemail(FormatUtil.nvl(String.valueOf(beanMain.getTake_usermail()), " "));
+			billTransVO.setCreate_dt(FormatUtil.nvl(String.valueOf(searchVatInfo.get("SBVT_CCD")), " "));	
+			billTransVO.setCma_account(FormatUtil.nvl(CMA_ACCOUNT, " "));			
+			billTransVO.setEtc04(FormatUtil.nvl(prePayment, " "));
+			
+			strErrMessage = String.valueOf(junpyoDAO.saveBillTrans(billTransVO));
+			
+			if(strErrMessage.equals("1")) {
+				// BillTransItem에 넣을 데이터 세팅
+				for(int i=0; i<searchBillTransInfo.size(); i++) {
+					
+					BillTransItemVO billTransItemVO = new BillTransItemVO();
+					
+					billTransItemVO.setBillseq(FormatUtil.nvl(seq, " "));
+					billTransItemVO.setItemseq(String.valueOf(i+1));
+					billTransItemVO.setTax(FormatUtil.nvl(searchBillTransInfo.get(i).getTax(), " "));
+					billTransItemVO.setSup(FormatUtil.nvl(searchBillTransInfo.get(i).getSup(), " "));
+					billTransItemVO.setDanga(FormatUtil.nvl(searchBillTransInfo.get(i).getDanga(), " "));
+					billTransItemVO.setVlm(FormatUtil.nvl(searchBillTransInfo.get(i).getVlm(), " "));
+					billTransItemVO.setUnit(FormatUtil.nvl(searchBillTransInfo.get(i).getUnit(), " "));
+					billTransItemVO.setObj(FormatUtil.nvl(searchBillTransInfo.get(i).getObj(), " "));
+					billTransItemVO.setDt(FormatUtil.nvl(FormatUtil.strToDate(searchVatInfo.get("SBVT_DATE")), " "));
+					billTransItemVO.setRemark(FormatUtil.nvl(searchBillTransInfo.get(i).getRemark(), " "));
+				
+					strErrMessage = String.valueOf(junpyoDAO.saveBillTransItem(billTransItemVO));
+				}
+			}else{ 
+            	strErrMessage = "전자세금계산서 입력 에러";
+            	return strErrMessage;
+            }
+
+			String sbvt_gubun = String.valueOf(searchVatInfo.get("SBVT_GUBUN"));
+			String sbvt_code = String.valueOf(searchVatInfo.get("SBVT_CODE"));
+			String sbvt_gno = String.valueOf(searchVatInfo.get("SBVT_GNO"));
+			
+			if(strErrMessage.equals("1")) {
+				strErrMessage =
+				  String.valueOf(junpyoDAO.vat_Resseq(seq, sbvt_gubun, sbvt_code, sbvt_gno));
+				 
+			}else{ 
+            	strErrMessage = "전자세금계산서 상세 입력 에러";
+            	return strErrMessage;
+            }
+			
+			if(!strErrMessage.equals("1")) {
+            	strErrMessage = "전표부가세 계산서번호 입력 에러";
+            	return strErrMessage;
+			}
+			
+		} catch (Exception e) {
+        	logger.info("transactionManager.rollback");
+			e.printStackTrace();
+			strErrMessage = "전자세금계산서 에러 롤백";
+		}
+		
+		return strErrMessage;
+	}
+
+	@Override
+	public String save_junpyo(SerialMainVO beanMain) {
+		String strErrMessage = "";
+		try {
+			junpyoDAO.save_junpyo(beanMain);
+		} catch (Exception e) {
+			e.printStackTrace();
+			strErrMessage = "0";
+		}
+		return strErrMessage;
+	}
+
+	@Override
+	public String saveJunpyoMain(SerialMainVO beanMain) {
+		
+		String strErrMessage = "";
+		
+		try {
+			JunpyoVO junpyoVO = new JunpyoVO();
+			String deposit_class = "";		//입금구분
+			String maxIn_jun_no = "";		//입금전표 번호
+			String maxIn_jun_wno = "";		//입금전표 확인번호
+			String sang_jun_no = "";		//상대전표 번호
+			int jun_sort = 1;				//전표 정렬 일련 번호
+			int jun_gno = 1;				//전표 그룹 번호
+
+			junpyoVO.setJun_gubun(FormatUtil.nvl("01",""));                        //구분
+			junpyoVO.setJun_inuser(FormatUtil.nvl(beanMain.getCu_code(),""));                      //전표입력사원자 사번
+			junpyoVO.setJun_inusernm(FormatUtil.nvl("ERS",""));                    //전표입력사원명
+			junpyoVO.setJun_inbusor(FormatUtil.nvl("100003",""));                  //전표입력부서코드
+			junpyoVO.setJun_inbusornm(FormatUtil.nvl("영업팀",""));	            //전표입력 부서이름
+			junpyoVO.setJun_branch(FormatUtil.nvl("000",""));			            //전표입력 부서이름
+			junpyoVO.setJun_wdate(FormatUtil.nvl(beanMain.getIssue_date(),""));    //발행일자_기준으로 전표 생성
+			junpyoVO.setJun_chaak(FormatUtil.nvl(beanMain.getShip_dep(),"0"));     //총임금금액  
+			junpyoVO.setJun_cust(FormatUtil.nvl(beanMain.getCu_code(),"0")); 
+			junpyoVO.setJun_gno(jun_gno);
+			junpyoVO.setJun_sort(jun_sort);
+			
+			deposit_class = FormatUtil.nvl("20","");
+			
+			if (junpyoVO.getJun_gubun().length() == 0 || junpyoVO.getJun_inuser().length() == 0  || junpyoVO.getJun_inbusornm().length() == 0
+					|| junpyoVO.getJun_inbusornm().length() == 0  || junpyoVO.getJun_inbusor().length() == 0  || junpyoVO.getJun_branch().length() == 0){
+				throw new Exception("입력사용자 정보가 잘못되었습니다.");
+			}else if (deposit_class.length() == 0){
+				throw new Exception("입금구분을 설정해 주세요.");
+			}else{
+				sang_jun_no = make_injunpyo(beanMain);
+				junpyoVO.setSang_jun_no(sang_jun_no);
+				
+				if(sang_jun_no == "") {
+			    	throw new Exception("상대전표번호 조회 오류1");
+				}
+			}
+			
+			maxIn_jun_no = make_sangJunpyo(beanMain);			
+			if(maxIn_jun_no == null) {
+		    	throw new Exception("상대전표번호 조회 오류2");
+			}
+			else {
+	    		if(maxIn_jun_no != "") {
+	    			junpyoVO.setJun_no(maxIn_jun_no);
+	    		}
+	    		else {
+	    			maxIn_jun_no = junpyoVO.getJun_wdate() + "0001";
+	    			junpyoVO.setJun_no(maxIn_jun_no);
+	    		}
+				
+			}
+			
+			maxIn_jun_wno = make_inJun_wno(beanMain);			
+			if(maxIn_jun_wno == null) {
+		    	throw new Exception("상대전표번호 조회 오류3");
+			}
+			else {
+				if(maxIn_jun_wno != "") {
+					junpyoVO.setJun_wno(maxIn_jun_wno);
+	    		}
+	    		else {
+					maxIn_jun_wno = junpyoVO.getJun_wdate() + "0001";
+	    			junpyoVO.setJun_no(maxIn_jun_no);
+	    		}
+			}
+			
+			DepoVO depovo = make_depoData(beanMain.getIssue_date().substring(0, 4), deposit_class);
+			if(depovo == null) {
+		    	throw new Exception("등록된 입금구분 정보가 없습니다.");
+			}
+			else {
+				junpyoVO.setDepo_cd(depovo.getDepo_cd());               //입금계정
+				junpyoVO.setDepo_contracd(depovo.getDepo_contracd());   //상대계정
+				junpyoVO.setDepo_bankcd(depovo.getDepo_bankcd());       //은행계좌코드
+				junpyoVO.setDepo_account(depovo.getDepo_account());     //은행계좌번호
+			}
+			
+			// 입금전표 입력
+			strErrMessage = String.valueOf(junpyoDAO.insertInJunpyo(junpyoVO));
+			
+			// 상대전표 입력
+			if(strErrMessage.equals("1")) {	 
+				junpyoVO.setJun_gno(++jun_gno);
+				junpyoVO.setJun_sort(++jun_sort);
+				strErrMessage = String.valueOf(junpyoDAO.insertInJunpyo2(junpyoVO));
+			}
+			// 미불 입력
+			if(strErrMessage.equals("1")) {	 
+				strErrMessage = String.valueOf(junpyoDAO.insertMibul(junpyoVO));
+			}
+			// 입금전표 내역 입력
+			if(strErrMessage.equals("1")) {	 
+				strErrMessage = String.valueOf(junpyoDAO.insertSInJunpyo(junpyoVO));
+			}
+			
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			strErrMessage = "0";
+			return strErrMessage;
+		}
+		return strErrMessage;
+	}
+
+	@Override
+	public int To_greenBillTB(SerialMainVO beanMain) {
+		try {
+			junpyoDAO.To_greenBillTB(beanMain);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return 0;
+		}
+		return 1;
+	}
+
+	@Override
+	public String make_injunpyo(SerialMainVO beanMain) {
+		String in_junno = "";
+		
+		try {
+			in_junno = junpyoDAO.make_injunpyo(beanMain);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return in_junno;
+		}
+		return in_junno;
+	}
+
+	@Override
+	public String make_junpyo(SerialMainVO beanMain) {
+		String jun_no = "";
+		
+		try {
+			jun_no = junpyoDAO.make_junpyo(beanMain);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return jun_no;
+		}
+		return jun_no;
+	}
+
+	@Override
+	public String make_sangJunpyo(SerialMainVO beanMain) {
+		String sang_jun_no = "";
+		
+		try {
+			sang_jun_no = junpyoDAO.make_sangJunpyo(beanMain);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return sang_jun_no;
+		}
+		return sang_jun_no;
+	}
+
+	@Override
+	public String make_inJun_wno(SerialMainVO beanMain) {
+		String inJun_wno = "";
+		
+		try {
+			inJun_wno = junpyoDAO.make_inJun_wno(beanMain);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return inJun_wno;
+		}
+		return inJun_wno;
+	}
+
+	@Override
+	public DepoVO make_depoData(String issue_date, String deposit_class) {
+		DepoVO depovo = new DepoVO();
+		
+		try {
+			depovo = junpyoDAO.make_depoData(issue_date, deposit_class);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return depovo;
+		}
+		return depovo;
+	}
+
+	@Override
+	public int insertInJunpyo(JunpyoVO junpyoVO) {
+		try {
+			junpyoDAO.insertInJunpyo(junpyoVO);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return 0;
+		}
+		return 1;
+	}
+
+	@Override
+	public int insertInJunpyo2(JunpyoVO junpyoVO) {
+		try {
+			junpyoDAO.insertInJunpyo2(junpyoVO);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return 0;
+		}
+		return 1;
+	}
+
+	@Override
+	public int insertMibul(JunpyoVO junpyoVO) {
+		try {
+			junpyoDAO.insertMibul(junpyoVO);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return 0;
+		}
+		return 1;
+	}
+
+	@Override
+	public int insertSInJunpyo(JunpyoVO junpyoVO) {
+		try {
+			junpyoDAO.insertSInJunpyo(junpyoVO);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return 0;
+		}
+		return 1;
+	}
+
+	@Override
+	public HashMap<String, String> searchSerialJunno(String serial) {
+		return junpyoDAO.searchSerialJunno(serial);
+	}
+
+	@Override
+	public HashMap<String, String> searchBillClass(String serial) {
+		return junpyoDAO.searchBillClass(serial);
+	}
+
+	@Override
+	public HashMap<String, String> searchVatInfo(String serial) {
+		return junpyoDAO.searchVatInfo(serial);
+	}
+
+	@Override
+	public List<BillTransItemVO> searchBillTransInfo(String junno, String sbvt_gno) {
+		return junpyoDAO.searchBillTransInfo(junno, sbvt_gno);
+	}
+
+	@Override
+	public int saveBillTrans(BillTransVO billTransVO) {
+		try {
+			junpyoDAO.saveBillTrans(billTransVO);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return 0;
+		}
+		return 1;
+	}
+
+	@Override
+	public int saveBillTransItem(BillTransItemVO billTransItemVO) {
+		try {
+			junpyoDAO.saveBillTransItem(billTransItemVO);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return 0;
+		}
+		return 1;
+	}
+
+	@Override
+	public String createSequence(String seq) {
+		return junpyoDAO.createSequence(seq);
+	}
+
+	@Override
+	public int vat_Resseq(String resseq, String gubun, String issue_date, String sbvt_gno) {
+		try {
+			junpyoDAO.vat_Resseq(resseq, gubun, issue_date, sbvt_gno);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return 0;
+		}
+		return 1;
+	}
+}
